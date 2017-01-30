@@ -1,9 +1,11 @@
 package us_parser;
 
+import com.ww.model.TaigaUserStory;
+
 public class UserStoryParser {
 	private SpecData specData;
 
-	public void parseUserStory(UserStoryData userStoryData) {
+	public void parseUserStory(TaigaUserStory userStoryData) {
 		
 	}
 

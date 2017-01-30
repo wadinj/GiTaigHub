@@ -9,7 +9,7 @@ import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
-import us_parser.UserStoryData;
+import com.ww.model.TaigaUserStory;
 
 public class GithubParser {
 
@@ -22,12 +22,11 @@ public class GithubParser {
 	private GitHubClient client;
 	private RepositoryService repoService;
 	public GithubParser(String username, String password, String repositoryName) {
-		GitHubClient client = new GitHubClient();
-		client.setCredentials(username,password);
+
 		this.client = client;
 		this.repositoryName = repositoryName;
 	}
-	public List<Commit> getCommitFromTaigaUs(UserStoryData taigaUserStory) {
+	public List<Commit> getCommitFromTaigaUs(TaigaUserStory taigaUserStory) {
 		Repository repo = new Repository();
 		repoService = new RepositoryService(client);
 		
