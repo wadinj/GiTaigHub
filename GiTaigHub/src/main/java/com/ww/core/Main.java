@@ -1,7 +1,5 @@
 package com.ww.core;
 
-import com.ww.model.TaigaUserStory;
-
 public class Main {
 
 	public static void main(String[] args) {
@@ -11,7 +9,7 @@ public class Main {
 		TaigaService service = new TaigaService(usernameTaiga, passwordTaiga, projectTaiga);
 		//TaigaUserStory us = service.getUserStory("1");
 		//System.out.println(us.getDescription());
-		System.out.println(service.getUserStory("1"));
+		System.out.println(service.getUserStory("1").getDescription());
 	}
 
 }

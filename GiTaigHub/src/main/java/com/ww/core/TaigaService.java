@@ -21,7 +21,8 @@ public class TaigaService {
 	private RestTemplate restTemplate;
 	private final static String TAIGA_URI_AUTHENT = "https://api.taiga.io/api/v1/auth";
 	private String projectReference;
-	private final static String BASE_TAIGA_URI_GET_USERSTORY = "https://api.taiga.io/api/v1/userstories";
+	private final static String BASE_TAIGA_URI_GET_USERSTORY = "https://api.taiga.io/api/v1/userstories/by_ref?";
+	
 	public TaigaService(String usernameTaiga, String passwordTaiga,String projectReference) {
 		restTemplate = new RestTemplate();
 		TaigaAuthentificationRequest authentRequest = new TaigaAuthentificationRequest(usernameTaiga,passwordTaiga);
@@ -31,18 +32,24 @@ public class TaigaService {
 		this.projectReference = projectReference;
 	}
 
-	public String getUserStory(String ref) {
+	/**
+	 * Find user story by ref of US
+	 * @param ref
+	 * @return
+	 */
+	public TaigaUserStory getUserStory(String ref) {
 		HttpHeaders httpHeaders = new HttpHeaders(){
+			private static final long serialVersionUID = 1L;
+
 			{
 				set("Content-Type", "application/json");
 				set("Authorization", "Bearer " + token);
 			}
 		};
-		ResponseEntity<String> response;
-		String requestUri = BASE_TAIGA_URI_GET_USERSTORY + "?project=1";
+		ResponseEntity<TaigaUserStory> response;
+		String requestUri = BASE_TAIGA_URI_GET_USERSTORY + "ref=" + ref + "&project__slug=" + projectReference;
 		System.out.println("Request : " + requestUri);
-		//String requestUri = "https://api.taiga.io/api/v1/userstories/by_ref?ref=1&project=1";
-		response  = restTemplate.exchange(requestUri,HttpMethod.GET,new HttpEntity<Object>(httpHeaders),String.class);
+		response  = restTemplate.exchange(requestUri,HttpMethod.GET,new HttpEntity<Object>(httpHeaders),TaigaUserStory.class);
 		return response.getBody();
 	}
 }
