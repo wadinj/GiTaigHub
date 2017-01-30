@@ -1,11 +1,15 @@
 package com.ww.core;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.egit.github.core.Commit;
+import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.RepositoryService;
 
-import com.ww.utils.GiTaigHubPropertiesUtils;
+import us_parser.UserStoryData;
 
 public class GithubParser {
 
@@ -14,12 +18,33 @@ public class GithubParser {
 	 * @param taigaUserStory the Taiga object which represents the user story
 	 * @return list of commit
 	 */
-	public GithubParser(String username, String password) {
+	private String repositoryName;
+	private GitHubClient client;
+	private RepositoryService repoService;
+	public GithubParser(String username, String password, String repositoryName) {
 		GitHubClient client = new GitHubClient();
 		client.setCredentials(username,password);
+		this.client = client;
+		this.repositoryName = repositoryName;
 	}
-//	public List<Commit> getCommitFromTaigaUs(String taigaUserStory) {
-//		
-//	}
+	public List<Commit> getCommitFromTaigaUs(UserStoryData taigaUserStory) {
+		Repository repo = new Repository();
+		repoService = new RepositoryService(client);
+		
+		return new ArrayList<Commit>();
+	}
+	private Repository getSpecificRepository(String name) {
+		try {
+			List<Repository> repositories = repoService.getRepositories();
+			for(Repository repository : repositories) {
+				if(repository.getName().equals(name)) {
+					return repository;
+				}
+			}
+		} catch (IOException e) {
+			System.err.println("Problem to retrieve repository from GitHub");
+		}
+		return null;
+	}
 	
 }
