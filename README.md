@@ -13,7 +13,7 @@ Here we are trying to automate test from the first document which describe the f
 
 To get this description, we use automatic Taiga.io bridge will allow the user to directly convert his user stories to TDD code and unit test.
 
-This soft is capable to convert Structured English to code.\n
+This soft is capable to convert Structured English to code.
 Per example :
 ```
 BankManagement can allow loan facility to Customer
