@@ -9,6 +9,12 @@ public class StructuredMethod extends AbstractStructuredMethod {
 		super(name, args, annotation);
 		this.returnType = returnType;
 	}
+	
+	public StructuredMethod(String name, String returnType, String[] args) {
+		super(name, args, null);
+		this.returnType = returnType;
+	}
+	
 	public String getReturnType() {
 		return returnType;
 	}

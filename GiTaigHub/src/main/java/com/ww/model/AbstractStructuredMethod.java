@@ -11,6 +11,7 @@ public class AbstractStructuredMethod {
 		this.args = args;
 		this.annotation = annotation;
 	}
+	
 	public Class<?> getAnnotation() {
 		return annotation;
 	}

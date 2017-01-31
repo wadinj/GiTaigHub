@@ -1,5 +1,7 @@
 package com.ww.core;
 
+import us_parser.UserStoryParser;
+
 public class Main {
 
 	public static void main(String[] args) {
@@ -7,7 +9,8 @@ public class Main {
 		String passwordTaiga = args[1];
 		String projectTaiga = args[2];
 		TaigaService service = new TaigaService(usernameTaiga, passwordTaiga, projectTaiga);
-		System.out.println(service.getUserStory("1").getDescription());
+		UserStoryParser userStoryParser = new UserStoryParser();
+		userStoryParser.parseUserStory(service.getUserStory("1"));
 	}
 
 }

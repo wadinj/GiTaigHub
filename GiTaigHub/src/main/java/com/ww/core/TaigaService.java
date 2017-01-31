@@ -8,7 +8,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.ww.model.TaigaAuthentificationRequest;
 import com.ww.model.TaigaAuthentificationResponse;
-import com.ww.model.TaigaUserStory;
+
+import us_parser.TaigaUserStory;
 
 /**
  * Taiga Service which allows the user to request his taiga
