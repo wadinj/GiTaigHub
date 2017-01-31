@@ -51,6 +51,26 @@ public class StructuredClass {
 		return methods;
 	}
 
+	public List<StructuredConstrutor> getConstructors() {
+		return constructors;
+	}
+
+	public void setConstructors(List<StructuredConstrutor> constructors) {
+		this.constructors = constructors;
+	}
+
+	public List<StructuredAttribut> getAttributs() {
+		return attributs;
+	}
+
+	public void setAttributs(List<StructuredAttribut> attributs) {
+		this.attributs = attributs;
+	}
+
+	public void setMethods(List<StructuredMethod> methods) {
+		this.methods = methods;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
