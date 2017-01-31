@@ -73,7 +73,7 @@ public class UserStoryParser {
 
 	private StructuredMethod getUserStoryMethod(String statement) {
 		String methodName = "";
-		String returnType = getMethodReturnType(statement);
+		Class<?> returnType = getMethodReturnType(statement);
 		Pattern patternMethod = null;
 		String[] args = new String[1];
 		if (statement.contains(Keywords.TO.getName())) {
@@ -92,17 +92,17 @@ public class UserStoryParser {
 	
 	private StructuredMethod getMethod(String statement) {
 		String methodName = "";
-		String returnType = getMethodReturnType(statement);
+		Class<?> returnType = getMethodReturnType(statement);
 		StructuredMethod structuredMethod = new StructuredMethod(methodName, returnType, null);
 		
 		return structuredMethod;
 	}
 
-	private String getMethodReturnType(String statement) {
+	private Class<?> getMethodReturnType(String statement) {
 		if (statement.startsWith(Keywords.IF.getName()))
-			return "boolean";
+			return boolean.class;
 		else
-			return "void";
+			return void.class;
 	}
 
 	public StructuredUserStory getStructuredUserStory() {

@@ -2,23 +2,23 @@ package com.ww.model;
 
 public class StructuredMethod extends AbstractStructuredMethod {
 
-	private String returnType;
+	private Class<?> returnType;
 
 
-	public StructuredMethod(String name, String returnType, String[] args, Class<?> annotation) {
+	public StructuredMethod(String name, Class<?> returnType, String[] args, Class<?> annotation) {
 		super(name, args, annotation);
 		this.returnType = returnType;
 	}
 	
-	public StructuredMethod(String name, String returnType, String[] args) {
+	public StructuredMethod(String name, Class<?> returnType, String[] args) {
 		super(name, args, null);
 		this.returnType = returnType;
 	}
 	
-	public String getReturnType() {
+	public Class<?> getReturnType() {
 		return returnType;
 	}
-	public void setReturnType(String returnType) {
+	public void setReturnType(Class<?> returnType) {
 		this.returnType = returnType;
 	}	
 }
