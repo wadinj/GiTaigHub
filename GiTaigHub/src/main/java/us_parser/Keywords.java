@@ -4,10 +4,13 @@ public enum Keywords {
 	CAN(" can "),
 	TO(" to "),
 	HAS(" has "),
-	IF("if "),
-	THEN(" then"),
-	ELSE("else"),
-	ENDIF("endif");
+	IF("IF "),
+	THEN(" THEN"),
+	ELSE("ELSE"),
+	ENDIF("ENDIF"),
+	ONE("a "),
+	NONE("no "),
+	MANY(" many ");
 	
 	private String name;
 	

@@ -17,4 +17,8 @@ public class StringUtils {
 	public static String capitalize(final String word) {
 		return Character.toUpperCase(word.charAt(0)) + word.substring(1);
 	}
+	
+	public static String uncapitalize(final String word) {
+		return Character.toLowerCase(word.charAt(0)) + word.substring(1);
+	}
 }
