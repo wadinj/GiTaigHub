@@ -67,17 +67,10 @@ public class StructuredClass {
 		return attributs;
 	}
 
-	public List<StructuredConstrutor> getConstructors() {
-		return constructors;
-	}
-
 	public void setConstructors(List<StructuredConstrutor> constructors) {
 		this.constructors = constructors;
 	}
 
-	public List<StructuredAttribut> getAttributs() {
-		return attributs;
-	}
 
 	public void setAttributs(List<StructuredAttribut> attributs) {
 		this.attributs = attributs;

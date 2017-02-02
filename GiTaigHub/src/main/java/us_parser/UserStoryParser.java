@@ -2,9 +2,7 @@ package us_parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,15 +15,10 @@ import com.ww.utils.StringUtils;
 
 public class UserStoryParser {
 	private StructuredUserStory structuredUserStory;
+	private static String classPattern = "([A-Z][a-z0-9]+)+";
+	Pattern classNamePattern = Pattern.compile(classPattern);
 	
 	public void parseUserStory(TaigaUserStory taigaUserStory) {
-		// System.out.println(taigaUserStory.getDescription());
-		// choper le nom de la classe avec le can et cr�er une m�thode de �a
-
-		// choper le nom de la m�thode, la classe concern�e, le type de retour
-		// attendu (void en statement, boolean dans un if)
-		// choper les statements
-		// has => cr�ation d'une liste d'entity de [Classe] pour has Classe
 		structuredUserStory = new StructuredUserStory();
 		List<StructuredClass> classes = getClassesFromUserStory(taigaUserStory);
 		structuredUserStory.setClasses(classes);
@@ -36,41 +29,41 @@ public class UserStoryParser {
 
 	private List<StructuredClass> getClassesFromUserStory(TaigaUserStory taigaUserStory) {
 		List<StructuredClass> structuredClasses = new ArrayList<StructuredClass>();
-		Map<StructuredClass, List<StructuredMethod>> classesMethodsMap = new HashMap<StructuredClass, List<StructuredMethod>>();
 
 		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
-		Pattern pattern = Pattern.compile("([A-Z][a-z0-9]+)+");
 		Matcher matcher;
 
 		for (String statement : statements) {
-			matcher = pattern.matcher(statement);
+			statement = statement.trim();
+			matcher = classNamePattern.matcher(statement);
 			int i = 0;
 			while (matcher.find()) {
 				StructuredClass parsedClass = new StructuredClass(matcher.group().trim());
-				if (!classesMethodsMap.containsKey(parsedClass)) {
-					classesMethodsMap.put(parsedClass, new ArrayList<StructuredMethod>());
+				if (!structuredClasses.contains(parsedClass)) {
+					structuredClasses.add(parsedClass);
 					StructuredConstrutor constructor = new StructuredConstrutor(parsedClass.getName(), null, null, null, new ArrayList<String>());
 					parsedClass.addConstructor(constructor);
 				}
-				if(i++ == 0)
+				int index = getIndexOfClass(structuredClasses, matcher.group().trim());
+				if(i++ == 0) //si c'est la première classe rencontrée dans le statement
 					if(statement.contains(Keywords.HAS.getName()))
-						handleStatementAttribut(classesMethodsMap, statement, parsedClass);
+						handleStatementAttribut(statement, structuredClasses.get(index));
 					else
-						handleStatementMethod(classesMethodsMap, statement, parsedClass);
+						handleStatementMethod(structuredClasses, statement, structuredClasses.get(index));
 			}
-		}
-		for(StructuredClass structuredClass : classesMethodsMap.keySet()) {
-			StructuredClass newClass = new StructuredClass(structuredClass.getName());
-			newClass.addMethods(classesMethodsMap.get(structuredClass));
-			newClass.addConstructors(structuredClass.getConstructors());
-			newClass.addAttributs(structuredClass.getAttributs());
-			structuredClasses.add(newClass);
 		}
 		return structuredClasses;
 	}
 
-	private void handleStatementAttribut(Map<StructuredClass, List<StructuredMethod>> classesMethodsMap,
-			String statement, StructuredClass parsedClass) {
+	private int getIndexOfClass(List<StructuredClass> structuredClasses, String className) {
+		int index = 0;
+		for(int j = 0; j < structuredClasses.size(); j++)
+			if(structuredClasses.get(j).getName().equals(className))
+				index = j;
+		return index;
+	}
+
+	private void handleStatementAttribut(String statement, StructuredClass parsedClass) {
 		String single = Keywords.HAS.getName() + Keywords.ONE.getName();
 		String many = Keywords.HAS.getName() + Keywords.MANY.getName();;
 		String none = Keywords.HAS.getName() + Keywords.NONE.getName();
@@ -82,7 +75,7 @@ public class UserStoryParser {
 		if (statement.contains(single)) {
 			structuredAttribut = buildStructuredAttribut(statement, single, then, attributClassName);
 			//créer un statement dans les constructeurs de la classe qui initialise la valeur en appelant le constructeur vide
-			String attributInitializationstatement = structuredAttribut.getName() + " = new " + structuredAttribut.getType() + "();";
+			String attributInitializationstatement = "this." + structuredAttribut.getName() + " = new " + structuredAttribut.getType() + "();";
 			for(StructuredConstrutor structuredConstrutor : parsedClass.getConstructors())
 				structuredConstrutor.addStatement(attributInitializationstatement);
 		} else
@@ -114,15 +107,14 @@ public class UserStoryParser {
 		return attributClass;
 	}
 
-	private void handleStatementMethod(Map<StructuredClass, List<StructuredMethod>> classesMethodsMap, String statement,
-			StructuredClass parsedClass) {
-		StructuredMethod method;
+	private void handleStatementMethod(List<StructuredClass> structuredClasses, String statement, StructuredClass parsedClass) {
+		StructuredMethod method = null;
 		if (statement.contains(Keywords.CAN.getName()))
 			method = getUserStoryMethod(statement);
+		if(method != null && method.getName() != null && !method.getName().isEmpty())
+			parsedClass.addMethod(method);
 		else 
-			method = getMethod(statement);
-		if(method.getName() != null && !method.getName().isEmpty())
-			classesMethodsMap.get(parsedClass).add(method);
+			getMethod(structuredClasses, statement);
 	}
 
 	private StructuredMethod getUserStoryMethod(String statement) {
@@ -147,21 +139,48 @@ public class UserStoryParser {
 		return structuredMethod;
 	}
 	
-	private StructuredMethod getMethod(String statement) {
+	private void getMethod(List<StructuredClass> structuredClasses, String statement) {
 		String methodName = "";
+		String className = "";
 		Class<?> returnType = getMethodReturnType(statement);
-		System.out.println(statement);
+		List<String> args = new ArrayList<String>();
+	
+		System.out.println(statement + returnType);
+		//choper la classe dans laquelle on met la méthode
+		Matcher matcher, matcherMethodName;
+		matcher = classNamePattern.matcher(statement);
+		if(matcher.find())
+			className = matcher.group();
+		else 
+			return;
+		//choper ses arguments (les classes suivantes sur le statement)
+		while(matcher.find())
+			args.add(matcher.group().trim() + " " + StringUtils.uncapitalize(matcher.group().trim()));
+		String[] argsArray = new String[args.size()];
+		args.toArray(argsArray);
 		
+		//choper le nom de la méthode patternmethode (entre 2 classes ou entre classes et then si y'a rien entre la méthode et then)
+		String stmt = statement.substring(Keywords.IF.getName().length(), statement.length() - Keywords.THEN.getName().length());
 		
+		Pattern patternMethodName = Pattern.compile(" ([a-z0-9])+ ");
+		matcherMethodName = patternMethodName.matcher(stmt);
 		
-		
-		StructuredMethod structuredMethod = new StructuredMethod(methodName, returnType, null);
-		
-		return structuredMethod;
+		while(matcherMethodName.find()) {
+			methodName = matcherMethodName.group().trim();
+		}
+		StructuredMethod structuredMethod = new StructuredMethod(methodName, returnType, argsArray);
+		StructuredClass newClass = new StructuredClass(className);
+		if (!structuredClasses.contains(newClass)) {
+			structuredClasses.add(newClass);
+			StructuredConstrutor constructor = new StructuredConstrutor(newClass.getName(), null, null, null, new ArrayList<String>());
+			newClass.addConstructor(constructor);
+			newClass.addMethod(structuredMethod);
+		} else
+			structuredClasses.get(getIndexOfClass(structuredClasses, className)).addMethod(structuredMethod);
 	}
 
 	private Class<?> getMethodReturnType(String statement) {
-		statement.replaceAll("\t", "");
+		statement = statement.trim();
 		if (statement.startsWith(Keywords.IF.getName()))
 			return Boolean.class;
 		else
