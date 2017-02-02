@@ -1,17 +1,17 @@
 # GiTaigHub
 
-GiTaigHub is a specification to code converter write in Java for Java.
+GiTaigHub is a specification to code converter written in Java for Java.
 
-This idea come from one main practice which is to write a full description of software functionality before coding and testing it.
+This idea comes from one main practice which is to write a full description of software functionality before coding and testing it.
 
 
 In big project, these steps are processed by 3 differents teams and the knowledge of functionality have to be duplicated to all these stackholders.
 
 
-Here we are trying to automate test from the first document which describe the functionality.
+Here we are trying to automate tests from the first document which describes the functionality.
 
 
-To get this description, we use automatic Taiga.io bridge will allow the user to directly convert his user stories to TDD code and unit test.
+To get this description, we use automatic Taiga.io bridge to allow the user to directly convert his user stories to TDD code and unit test.
 
 This soft is capable to convert Structured English to code.
 Per example :
@@ -32,6 +32,6 @@ ELSE
 ENDIF
 ```
 
-Will create three classes Customer, BankAccount, BankManagement which represents the entity.
+Will create four classes Customer, BankAccount, BankManagement and Dues which represent the entities.
 
-To Continue...
+To be continued...
