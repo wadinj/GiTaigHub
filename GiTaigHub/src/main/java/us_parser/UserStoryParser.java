@@ -10,6 +10,7 @@ import com.ww.model.StructuredAttribut;
 import com.ww.model.StructuredClass;
 import com.ww.model.StructuredConstrutor;
 import com.ww.model.StructuredMethod;
+import com.ww.model.StructuredTest;
 import com.ww.model.StructuredUserStory;
 import com.ww.utils.StringUtils;
 
@@ -25,9 +26,76 @@ public class UserStoryParser {
 		List<StructuredClass> classes = getClassesDataFromUserStory(taigaUserStory);
 		structuredUserStory.setClasses(classes);
 
-		// for(StructuredClass structuredClass : classes)
-		// System.out.println(structuredClass.getName() +
-		// structuredClass.getMethods().size());
+		StructuredTest test = buildTestCase(taigaUserStory, structuredUserStory);
+		structuredUserStory.setTest(test);
+	}
+
+	private StructuredTest buildTestCase(TaigaUserStory taigaUserStory, StructuredUserStory structuredUserStory) {
+		StructuredTest structuredTest = new StructuredTest();
+		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
+
+		for (String statement : statements) {
+			statement = statement.trim();
+			if (!statement.contains(Keywords.CAN.getName())) {
+				boolean isASimpleStatement = true;
+				for (Keywords keyword : Keywords.values())
+					if (statement.startsWith(keyword.getName()))
+						isASimpleStatement = false;
+				if (isASimpleStatement) {
+					String testStatement = "\nassertTrue(" + StringUtils.uncapitalize(userStoryClass.getName()) + "."
+							+ StringUtils.stringAsMethodName(statement) + "(";
+					if (userStoryArgClassName != null && !userStoryArgClassName.isEmpty())
+						testStatement += StringUtils.uncapitalize(userStoryArgClassName);
+					testStatement += "));\n";
+					structuredTest.addStatement(testStatement);
+				}
+				if (statement.startsWith(Keywords.IF.getName())) {
+					structuredTest.addStatement("\nif(");
+					structuredTest.addStatement(buildIfCondition(structuredUserStory, statement.substring(
+							Keywords.IF.getName().length(), statement.length() - Keywords.THEN.getName().length())));
+					structuredTest.addStatement(") {\n");
+				}
+				if (statement.startsWith(Keywords.ELSE.getName())) {
+					structuredTest.addStatement("\n} else {\n");
+				}
+				if (statement.startsWith(Keywords.ENDIF.getName())) {
+					structuredTest.addStatement("\n}\n");
+				}
+			}
+		}
+		return structuredTest;
+	}
+
+
+	private String buildIfCondition(StructuredUserStory structuredUserStory, String statement) {
+		String single = Keywords.HAS.getName() + Keywords.ONE.getName();
+		String many = Keywords.HAS.getName() + Keywords.MANY.getName();
+		String none = Keywords.HAS.getName() + Keywords.NONE.getName();
+		
+		String ifCondition = "";
+		Matcher matcher;
+		matcher = classNamePattern.matcher(statement);
+		if(!statement.contains(Keywords.HAS.getName())) {
+			StructuredMethod method = getMethod(structuredUserStory.getClasses(), statement);
+			if(matcher.find())
+				ifCondition += StringUtils.uncapitalize(matcher.group()) + "." + method.getName() + "(";
+			for(int i = 0; i < method.getArgs().length; i++) {
+				if(i > 0)
+					ifCondition += ", ";
+				ifCondition += method.getArgs()[i].split(" ")[1];
+			}
+			ifCondition += ")";
+		} else {
+			if(matcher.find())
+				ifCondition += StringUtils.uncapitalize(matcher.group());
+			if(matcher.find())
+				ifCondition += ".get" + matcher.group() + "()";
+			if(statement.contains(single) || statement.contains(many))
+				ifCondition += " != null";
+			if(statement.contains(none))
+				ifCondition += " == null";
+		}
+		return ifCondition;
 	}
 
 	private List<StructuredClass> getClassesDataFromUserStory(TaigaUserStory taigaUserStory) {
@@ -71,13 +139,13 @@ public class UserStoryParser {
 	private void extractActionMethod(List<StructuredClass> structuredClasses, String statement) {
 		boolean methodAlreadyParsed = false;
 		String actionMethodName = StringUtils.stringAsMethodName(statement);
-		for(StructuredMethod method : userStoryClass.getMethods())
-			if(method.getName().equals(actionMethodName))
+		for (StructuredMethod method : userStoryClass.getMethods())
+			if (method.getName().equals(actionMethodName))
 				methodAlreadyParsed = true;
-		if(!methodAlreadyParsed) {
+		if (!methodAlreadyParsed) {
 			StructuredClass classArg = getClassNamed(structuredClasses, userStoryArgClassName);
 			StructuredMethod newMethod = null;
-			if(classArg == null)
+			if (classArg == null)
 				newMethod = new StructuredMethod(actionMethodName, getMethodReturnType(statement), null);
 			else {
 				String[] args = new String[1];
@@ -95,11 +163,11 @@ public class UserStoryParser {
 				index = j;
 		return index;
 	}
-	
+
 	private StructuredClass getClassNamed(List<StructuredClass> structuredClasses, String className) {
-		for(StructuredClass structuredClass : structuredClasses)
-			if(className.equals(structuredClass.getName()))
-					return structuredClass;
+		for (StructuredClass structuredClass : structuredClasses)
+			if (className.equals(structuredClass.getName()))
+				return structuredClass;
 		return null;
 	}
 
@@ -178,13 +246,16 @@ public class UserStoryParser {
 			patternMethod = Pattern.compile(can + "(.*)");
 		Matcher matcherMethod = patternMethod.matcher(statement);
 		while (matcherMethod.find())
-			methodName = StringUtils.stringAsMethodName(matcherMethod.group().substring(can.length(), matcherMethod.group().length() - to.length())).trim();
+			methodName = StringUtils
+					.stringAsMethodName(
+							matcherMethod.group().substring(can.length(), matcherMethod.group().length() - to.length()))
+					.trim();
 		StructuredMethod structuredMethod = new StructuredMethod(methodName, returnType, args);
 
 		return structuredMethod;
 	}
 
-	private void getMethod(List<StructuredClass> structuredClasses, String statement) {
+	private StructuredMethod getMethod(List<StructuredClass> structuredClasses, String statement) {
 		String methodName = "";
 		String className = "";
 		Class<?> returnType = getMethodReturnType(statement);
@@ -196,7 +267,7 @@ public class UserStoryParser {
 		if (matcher.find())
 			className = matcher.group();
 		else
-			return;
+			return null;
 		// choper ses arguments (les classes suivantes sur le statement)
 		while (matcher.find())
 			args.add(matcher.group().trim() + " " + StringUtils.uncapitalize(matcher.group().trim()));
@@ -224,14 +295,16 @@ public class UserStoryParser {
 			newClass.addMethod(structuredMethod);
 		} else
 			structuredClasses.get(getIndexOfClass(structuredClasses, className)).addMethod(structuredMethod);
+		return structuredMethod;
 	}
 
 	private Class<?> getMethodReturnType(String statement) {
-		statement = statement.trim();
-		if (statement.startsWith(Keywords.IF.getName()))
-			return Boolean.class;
-		else
-			return Void.class;
+		// statement = statement.trim();
+		// if (statement.startsWith(Keywords.IF.getName()))
+		// return Boolean.class;
+		// else
+		// return Void.class;
+		return Boolean.class;
 	}
 
 	public StructuredUserStory getStructuredUserStory() {
