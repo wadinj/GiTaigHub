@@ -13,8 +13,6 @@ import com.ww.model.StructuredMethod;
 import com.ww.model.StructuredUserStory;
 import com.ww.utils.StringUtils;
 
-import junit.framework.Test;
-
 public class UserStoryParser {
 	private StructuredUserStory structuredUserStory;
 	private static String classPattern = "([A-Z][a-z0-9]+)+";
@@ -31,11 +29,14 @@ public class UserStoryParser {
 		structuredUserStory.setTests(tests);
 	}
 
-	private List<StructuredClass> buildTestCase(TaigaUserStory taigaUserStory, StructuredUserStory structuredUserStory) {
+	private List<StructuredClass> buildTestCase(TaigaUserStory taigaUserStory,
+			StructuredUserStory structuredUserStory) {
+		List<String> classesNameToInitialize = new ArrayList<String>();
 		List<StructuredClass> tests = new ArrayList<StructuredClass>();
 		StructuredClass structuredTestClass = new StructuredClass(userStoryClass.getName() + "Test");
 		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
-		StructuredMethod structuredTest = new StructuredMethod(StringUtils.stringAsMethodName(statements.get(0)) + "Test", void.class, new String[]{ });
+		StructuredMethod structuredTest = new StructuredMethod(
+				StringUtils.stringAsMethodName(statements.get(0)) + "Test", void.class, new String[] {});
 		structuredTest.setAnnotation(org.junit.Test.class);
 
 		for (String statement : statements) {
@@ -46,6 +47,7 @@ public class UserStoryParser {
 					if (statement.startsWith(keyword.getName()))
 						isASimpleStatement = false;
 				if (isASimpleStatement) {
+					handleInitializationNeed(classesNameToInitialize, userStoryClass.getName());
 					String testStatement = "\nassertTrue(" + StringUtils.uncapitalize(userStoryClass.getName()) + "."
 							+ StringUtils.stringAsMethodName(statement) + "(";
 					if (userStoryArgClassName != null && !userStoryArgClassName.isEmpty())
@@ -55,8 +57,11 @@ public class UserStoryParser {
 				}
 				if (statement.startsWith(Keywords.IF.getName())) {
 					structuredTest.addStatement("\nif(");
-					structuredTest.addStatement(buildIfCondition(structuredUserStory, statement.substring(
-							Keywords.IF.getName().length(), statement.length() - Keywords.THEN.getName().length())));
+					structuredTest
+							.addStatement(buildIfCondition(structuredUserStory,
+									statement.substring(Keywords.IF.getName().length(),
+											statement.length() - Keywords.THEN.getName().length()),
+									classesNameToInitialize));
 					structuredTest.addStatement(") {\n");
 				}
 				if (statement.startsWith(Keywords.ELSE.getName())) {
@@ -67,41 +72,58 @@ public class UserStoryParser {
 				}
 			}
 		}
+		for (String s : classesNameToInitialize) {
+			String initStatement = s + " " + StringUtils.uncapitalize(s) + " = new " + s + "();\n";
+			structuredTest.getStatements().add(0, initStatement);
+		}
 		structuredTestClass.addMethod(structuredTest);
 		tests.add(structuredTestClass);
 		return tests;
 	}
 
-
-	private String buildIfCondition(StructuredUserStory structuredUserStory, String statement) {
+	private String buildIfCondition(StructuredUserStory structuredUserStory, String statement,
+			List<String> classesNameToInitialize) {
 		String single = Keywords.HAS.getName() + Keywords.ONE.getName();
 		String many = Keywords.HAS.getName() + Keywords.MANY.getName();
 		String none = Keywords.HAS.getName() + Keywords.NONE.getName();
-		
+
 		String ifCondition = "";
 		Matcher matcher;
 		matcher = classNamePattern.matcher(statement);
-		if(!statement.contains(Keywords.HAS.getName())) {
+		if (!statement.contains(Keywords.HAS.getName())) {
 			StructuredMethod method = getMethod(structuredUserStory.getClasses(), statement);
-			if(matcher.find())
+			if (matcher.find()) {
+				handleInitializationNeed(classesNameToInitialize, matcher.group());
 				ifCondition += StringUtils.uncapitalize(matcher.group()) + "." + method.getName() + "(";
-			for(int i = 0; i < method.getArgs().length; i++) {
-				if(i > 0)
+			}
+			for (int i = 0; i < method.getArgs().length; i++) {
+				if (i > 0)
 					ifCondition += ", ";
 				ifCondition += StringUtils.uncapitalize(method.getArgs()[i]);
 			}
 			ifCondition += ")";
 		} else {
-			if(matcher.find())
+			if (matcher.find()) {
+				handleInitializationNeed(classesNameToInitialize, matcher.group());
 				ifCondition += StringUtils.uncapitalize(matcher.group());
-			if(matcher.find())
+			}
+			if (matcher.find())
 				ifCondition += ".get" + matcher.group() + "()";
-			if(statement.contains(single) || statement.contains(many))
+			if (statement.contains(single) || statement.contains(many))
 				ifCondition += " != null";
-			if(statement.contains(none))
+			if (statement.contains(none))
 				ifCondition += " == null";
 		}
 		return ifCondition;
+	}
+
+	private void handleInitializationNeed(List<String> classesNameToInitialize, String className) {
+		boolean needToInitialize = true;
+		for (String name : classesNameToInitialize)
+			if (name.equals(className))
+				needToInitialize = false;
+		if (needToInitialize)
+			classesNameToInitialize.add(className);
 	}
 
 	private List<StructuredClass> getClassesDataFromUserStory(TaigaUserStory taigaUserStory) {
@@ -299,7 +321,7 @@ public class UserStoryParser {
 					new ArrayList<String>());
 			newClass.addConstructor(constructor);
 			newClass.addMethod(structuredMethod);
-		} else 
+		} else
 			structuredClasses.get(getIndexOfClass(structuredClasses, className)).addMethod(structuredMethod);
 		return structuredMethod;
 	}
