@@ -56,7 +56,7 @@ public class UserStoryParser {
 					structuredTest.addStatement(") {\n");
 				}
 				if (statement.startsWith(Keywords.ELSE.getName())) {
-					structuredTest.addStatement("\n} else {\n");
+					structuredTest.addStatement("} else {");
 				}
 				if (statement.startsWith(Keywords.ENDIF.getName())) {
 					structuredTest.addStatement("\n}\n");
@@ -113,7 +113,7 @@ public class UserStoryParser {
 				isASmpleStatement = false;
 				StructuredClass parsedClass = new StructuredClass(matcher.group().trim());
 				if (!structuredClasses.contains(parsedClass)) {
-					structuredClasses.add(parsedClass);
+					structuredClasses.add(0, parsedClass);
 					StructuredConstrutor constructor = new StructuredConstrutor(parsedClass.getName(), null, null, null,
 							new ArrayList<String>());
 					parsedClass.addConstructor(constructor);
