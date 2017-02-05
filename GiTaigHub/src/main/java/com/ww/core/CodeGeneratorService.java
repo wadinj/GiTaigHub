@@ -80,8 +80,14 @@ public class CodeGeneratorService {
 						currentMethodBuilder.addParameter(getClassFromString(args.split(" ")[0]), args.trim().toLowerCase());
 					}
 				}
-				currentMethodBuilder.returns(structuredMethod.getReturnType())
-				.addComment("TODO: not yet implemented \n", new Object[] {});
+				currentMethodBuilder.returns(structuredMethod.getReturnType());
+				if(structuredMethod.getStatements() != null && structuredMethod.getStatements().size() > 0) {
+					for(String statement : structuredMethod.getStatements()) {
+						currentMethodBuilder.addCode(statement + "\n");
+					}
+				} else {
+					currentMethodBuilder.addComment("TODO: not yet implemented \n", new Object[] {});
+				}
 				currentClassBuilder.addMethod(currentMethodBuilder.build());
 			}
 			// Building constructors
