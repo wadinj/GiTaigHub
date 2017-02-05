@@ -13,10 +13,12 @@ import com.ww.model.StructuredMethod;
 import com.ww.model.StructuredUserStory;
 import com.ww.utils.StringUtils;
 
+import junit.framework.Test;
+
 public class UserStoryParser {
 	private StructuredUserStory structuredUserStory;
 	private static String classPattern = "([A-Z][a-z0-9]+)+";
-	Pattern classNamePattern = Pattern.compile(classPattern);
+	private Pattern classNamePattern = Pattern.compile(classPattern);
 	private StructuredClass userStoryClass;
 	private String userStoryArgClassName;
 
@@ -25,15 +27,16 @@ public class UserStoryParser {
 		List<StructuredClass> classes = getClassesDataFromUserStory(taigaUserStory);
 		structuredUserStory.setClasses(classes);
 
-		List<StructuredClass> test = buildTestCase(taigaUserStory, structuredUserStory);
-		structuredUserStory.setTests(test);
+		List<StructuredClass> tests = buildTestCase(taigaUserStory, structuredUserStory);
+		structuredUserStory.setTests(tests);
 	}
 
 	private List<StructuredClass> buildTestCase(TaigaUserStory taigaUserStory, StructuredUserStory structuredUserStory) {
 		List<StructuredClass> tests = new ArrayList<StructuredClass>();
-		StructuredClass structuredTest = new StructuredClass();
-		StructuredMethod structuredMethod = new StructuredMethod("TODO",void.class, new String[]{ } );
+		StructuredClass structuredTestClass = new StructuredClass(userStoryClass.getName() + "Test");
 		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
+		StructuredMethod structuredTest = new StructuredMethod(StringUtils.stringAsMethodName(statements.get(0)) + "Test", void.class, new String[]{ });
+		structuredTest.setAnnotation(Test.class);
 
 		for (String statement : statements) {
 			statement = statement.trim();
@@ -48,23 +51,24 @@ public class UserStoryParser {
 					if (userStoryArgClassName != null && !userStoryArgClassName.isEmpty())
 						testStatement += StringUtils.uncapitalize(userStoryArgClassName);
 					testStatement += "));\n";
-					structuredMethod.addStatement(testStatement);
+					structuredTest.addStatement(testStatement);
 				}
 				if (statement.startsWith(Keywords.IF.getName())) {
-					structuredMethod.addStatement("\nif(");
-					structuredMethod.addStatement(buildIfCondition(structuredUserStory, statement.substring(
+					structuredTest.addStatement("\nif(");
+					structuredTest.addStatement(buildIfCondition(structuredUserStory, statement.substring(
 							Keywords.IF.getName().length(), statement.length() - Keywords.THEN.getName().length())));
-					structuredMethod.addStatement(") {\n");
+					structuredTest.addStatement(") {\n");
 				}
 				if (statement.startsWith(Keywords.ELSE.getName())) {
-					structuredMethod.addStatement("} else {");
+					structuredTest.addStatement("} else {");
 				}
 				if (statement.startsWith(Keywords.ENDIF.getName())) {
-					structuredMethod.addStatement("\n}\n");
+					structuredTest.addStatement("\n}\n");
 				}
 			}
 		}
-		tests.add(structuredTest);
+		structuredTestClass.addMethod(structuredTest);
+		tests.add(structuredTestClass);
 		return tests;
 	}
 

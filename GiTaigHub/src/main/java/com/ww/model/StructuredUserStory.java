@@ -7,8 +7,10 @@ public class StructuredUserStory {
 
 	private List<StructuredClass> classes;
 	private List<StructuredClass> tests;
+	
 	public StructuredUserStory() {
 		classes = new ArrayList<StructuredClass>();
+		tests = new ArrayList<StructuredClass>();
 	}
 
 	public List<StructuredClass> getClasses() {
