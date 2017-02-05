@@ -30,6 +30,14 @@ public class StructuredClass {
 	public void addMethods(List<StructuredMethod> methods) {
 		this.methods.addAll(methods);
 	}
+	
+	public void addConstructors(List<StructuredConstrutor> constructors) {
+		this.constructors.addAll(constructors);
+	}
+	
+	public void addAttributs(List<StructuredAttribut> attributs) {
+		this.attributs.addAll(attributs);
+	}
 
 	public void addConstructor(StructuredConstrutor constructor) {
 		constructors.add(constructor);
@@ -50,18 +58,19 @@ public class StructuredClass {
 	public List<StructuredMethod> getMethods() {
 		return methods;
 	}
-
+	
 	public List<StructuredConstrutor> getConstructors() {
 		return constructors;
+	}
+
+	public List<StructuredAttribut> getAttributs() {
+		return attributs;
 	}
 
 	public void setConstructors(List<StructuredConstrutor> constructors) {
 		this.constructors = constructors;
 	}
 
-	public List<StructuredAttribut> getAttributs() {
-		return attributs;
-	}
 
 	public void setAttributs(List<StructuredAttribut> attributs) {
 		this.attributs = attributs;
