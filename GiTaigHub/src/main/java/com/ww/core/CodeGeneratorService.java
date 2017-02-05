@@ -43,13 +43,14 @@ public class CodeGeneratorService {
 	private String packageGeneratedClass;
 	private File directoryGeneratedClass;
 	private File packageGeneratedFile;
+	private JavaFile javaFile;
 
 	public CodeGeneratorService() {
 		packageGeneratedClass = GiTaigHubPropertiesUtils.getInstance().getProperties(PACKAGE_FOR_GENERATED_CLASS);
 		directoryGeneratedClass = new File(GiTaigHubPropertiesUtils.getInstance().getProperties(DIRECTORY_PATH_FOR_GENERATED_CLASS));
 		packageGeneratedFile = new File(directoryGeneratedClass.getAbsoluteFile() + "\\" + packageGeneratedClass.replace('.', '\\'));
 		try {
-			FileUtils.cleanDirectory(directoryGeneratedClass);
+			FileUtils.cleanDirectory(packageGeneratedFile);
 		} catch (IOException e) {
 			LOGGER.warn("Cannot clean directory of generated class, be careful on dependencies issues");
 		}
@@ -64,7 +65,7 @@ public class CodeGeneratorService {
 		TypeSpec.Builder currentClassBuilder;
 		MethodSpec.Builder currentMethodBuilder;
 		FieldSpec currentField;
-
+		boolean isTestClass = false;
 		for(StructuredClass structuredClass : classes) {
 			currentClassBuilder = TypeSpec.classBuilder(structuredClass.getName()).addModifiers(Modifier.PUBLIC);
 			// Building all methods
@@ -84,10 +85,12 @@ public class CodeGeneratorService {
 				currentMethodBuilder.returns(structuredMethod.getReturnType());
 				if(structuredMethod.getStatements() != null && structuredMethod.getStatements().size() > 0) {
 					for(String statement : structuredMethod.getStatements()) {
-						currentMethodBuilder.addCode(statement + "\n");
+						currentMethodBuilder.addCode(statement);
 					}
+					isTestClass = true;
 				} else {
 					currentMethodBuilder.addComment("TODO: not yet implemented \n", new Object[] {});
+					currentMethodBuilder.addCode("return null;");
 				}
 				currentClassBuilder.addMethod(currentMethodBuilder.build());
 			}
@@ -111,9 +114,15 @@ public class CodeGeneratorService {
 				currentField = FieldSpec.builder(getClassFromString(attribute.getType()), attribute.getName())
 						.addModifiers(Modifier.PROTECTED)
 						.build();
+				addGetterAndSetter(currentClassBuilder, attribute);
 				currentClassBuilder.addField(currentField);
 			}
-			JavaFile javaFile = JavaFile.builder(packageGeneratedClass, currentClassBuilder.build()).build();
+			if(!isTestClass) {
+				javaFile = JavaFile.builder(packageGeneratedClass, currentClassBuilder.build()).build();
+			} else {
+				javaFile = JavaFile.builder(packageGeneratedClass, currentClassBuilder.build()).addStaticImport(org.junit.Assert.class, "*").build();
+			}
+			isTestClass = false;
 			try {
 				LOGGER.debug("Writing class create to " + directoryGeneratedClass);
 				javaFile.writeTo(directoryGeneratedClass);
@@ -124,6 +133,20 @@ public class CodeGeneratorService {
 		}
 
 	}
+	private void addGetterAndSetter(TypeSpec.Builder currentClass, StructuredAttribut attribute) {
+		Class<?> classOfAttribute = getClassFromString(attribute.getType());
+		String attributeCamelCase = attribute.getName().substring(0,1).toUpperCase() + attribute.getName().substring(1);
+		MethodSpec.Builder getter = MethodSpec.methodBuilder("get"+attributeCamelCase).addModifiers(Modifier.PUBLIC);
+		MethodSpec.Builder setter = MethodSpec.methodBuilder("set"+attributeCamelCase).addModifiers(Modifier.PUBLIC);
+		getter.addCode("return " + attribute.getName() + ";\n")
+		.returns(classOfAttribute);
+		setter.addParameter(classOfAttribute, attribute.getName());
+		setter.addCode("this." + attribute.getName() + " = " + attribute.getName() + ";\n");
+		currentClass.addMethod(getter.build());
+		currentClass.addMethod(setter.build());
+
+	}
+
 	private Class<?> getClassFromString(String className) {
 		LOGGER.debug("Retrieve class from string : " + className);
 

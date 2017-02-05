@@ -36,7 +36,7 @@ public class UserStoryParser {
 		StructuredClass structuredTestClass = new StructuredClass(userStoryClass.getName() + "Test");
 		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
 		StructuredMethod structuredTest = new StructuredMethod(StringUtils.stringAsMethodName(statements.get(0)) + "Test", void.class, new String[]{ });
-		structuredTest.setAnnotation(Test.class);
+		structuredTest.setAnnotation(org.junit.Test.class);
 
 		for (String statement : statements) {
 			statement = statement.trim();
