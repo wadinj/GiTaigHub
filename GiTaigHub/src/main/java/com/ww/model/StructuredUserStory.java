@@ -6,8 +6,7 @@ import java.util.List;
 public class StructuredUserStory {
 
 	private List<StructuredClass> classes;
-	private StructuredTest test;
-	
+	private List<StructuredClass> tests;
 	public StructuredUserStory() {
 		classes = new ArrayList<StructuredClass>();
 	}
@@ -20,12 +19,12 @@ public class StructuredUserStory {
 		this.classes = classes;
 	}
 
-	public StructuredTest getTest() {
-		return test;
+	public List<StructuredClass> getTests() {
+		return tests;
 	}
 
-	public void setTest(StructuredTest test) {
-		this.test = test;
+	public void setTests(List<StructuredClass> tests) {
+		this.tests = tests;
 	}
 	
 }

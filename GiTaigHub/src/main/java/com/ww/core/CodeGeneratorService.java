@@ -55,11 +55,16 @@ public class CodeGeneratorService {
 	}
 
 	public void generateCodeFromStructuredUserStory(StructuredUserStory userStory) {
+		createClassFromList(userStory.getClasses());
+		//createClassFromList(userStory.getTest());
+	}
+
+	private void createClassFromList(List<StructuredClass> classes) {
 		TypeSpec.Builder currentClassBuilder;
 		MethodSpec.Builder currentMethodBuilder;
 		FieldSpec currentField;
 
-		for(StructuredClass structuredClass : userStory.getClasses()) {
+		for(StructuredClass structuredClass : classes) {
 			currentClassBuilder = TypeSpec.classBuilder(structuredClass.getName()).addModifiers(Modifier.PUBLIC);
 			// Building all methods
 			for(StructuredMethod structuredMethod : structuredClass.getMethods()) {
@@ -110,6 +115,7 @@ public class CodeGeneratorService {
 				throw new RuntimeException(e);
 			}
 		}
+
 	}
 	private Class<?> getClassFromString(String className) {
 		LOGGER.debug("Retrieve class from string : " + className);

@@ -10,7 +10,6 @@ import com.ww.model.StructuredAttribut;
 import com.ww.model.StructuredClass;
 import com.ww.model.StructuredConstrutor;
 import com.ww.model.StructuredMethod;
-import com.ww.model.StructuredTest;
 import com.ww.model.StructuredUserStory;
 import com.ww.utils.StringUtils;
 
@@ -26,12 +25,13 @@ public class UserStoryParser {
 		List<StructuredClass> classes = getClassesDataFromUserStory(taigaUserStory);
 		structuredUserStory.setClasses(classes);
 
-		StructuredTest test = buildTestCase(taigaUserStory, structuredUserStory);
-		structuredUserStory.setTest(test);
+		List<StructuredClass> test = buildTestCase(taigaUserStory, structuredUserStory);
+		structuredUserStory.setTests(test);
 	}
 
-	private StructuredTest buildTestCase(TaigaUserStory taigaUserStory, StructuredUserStory structuredUserStory) {
-		StructuredTest structuredTest = new StructuredTest();
+	private List<StructuredClass> buildTestCase(TaigaUserStory taigaUserStory, StructuredUserStory structuredUserStory) {
+		List<StructuredClass> tests = new ArrayList<StructuredClass>();
+		StructuredClass structuredTest = new StructuredClass();
 		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
 
 		for (String statement : statements) {
@@ -63,7 +63,8 @@ public class UserStoryParser {
 				}
 			}
 		}
-		return structuredTest;
+		tests.add(structuredTest);
+		return tests;
 	}
 
 
