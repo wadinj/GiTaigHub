@@ -149,7 +149,7 @@ public class UserStoryParser {
 				newMethod = new StructuredMethod(actionMethodName, getMethodReturnType(statement), null);
 			else {
 				String[] args = new String[1];
-				args[0] = classArg.getName() + " " + StringUtils.uncapitalize(classArg.getName());
+				args[0] = classArg.getName();
 				newMethod = new StructuredMethod(actionMethodName, getMethodReturnType(statement), args);
 			}
 			userStoryClass.addMethod(newMethod);
