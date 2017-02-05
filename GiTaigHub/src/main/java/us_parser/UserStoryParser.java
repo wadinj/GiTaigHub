@@ -32,6 +32,7 @@ public class UserStoryParser {
 	private List<StructuredClass> buildTestCase(TaigaUserStory taigaUserStory, StructuredUserStory structuredUserStory) {
 		List<StructuredClass> tests = new ArrayList<StructuredClass>();
 		StructuredClass structuredTest = new StructuredClass();
+		StructuredMethod structuredMethod = new StructuredMethod("TODO",void.class, new String[]{ } );
 		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
 
 		for (String statement : statements) {
@@ -47,19 +48,19 @@ public class UserStoryParser {
 					if (userStoryArgClassName != null && !userStoryArgClassName.isEmpty())
 						testStatement += StringUtils.uncapitalize(userStoryArgClassName);
 					testStatement += "));\n";
-					structuredTest.addStatement(testStatement);
+					structuredMethod.addStatement(testStatement);
 				}
 				if (statement.startsWith(Keywords.IF.getName())) {
-					structuredTest.addStatement("\nif(");
-					structuredTest.addStatement(buildIfCondition(structuredUserStory, statement.substring(
+					structuredMethod.addStatement("\nif(");
+					structuredMethod.addStatement(buildIfCondition(structuredUserStory, statement.substring(
 							Keywords.IF.getName().length(), statement.length() - Keywords.THEN.getName().length())));
-					structuredTest.addStatement(") {\n");
+					structuredMethod.addStatement(") {\n");
 				}
 				if (statement.startsWith(Keywords.ELSE.getName())) {
-					structuredTest.addStatement("} else {");
+					structuredMethod.addStatement("} else {");
 				}
 				if (statement.startsWith(Keywords.ENDIF.getName())) {
-					structuredTest.addStatement("\n}\n");
+					structuredMethod.addStatement("\n}\n");
 				}
 			}
 		}

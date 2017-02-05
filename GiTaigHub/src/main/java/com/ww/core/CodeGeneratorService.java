@@ -56,7 +56,7 @@ public class CodeGeneratorService {
 
 	public void generateCodeFromStructuredUserStory(StructuredUserStory userStory) {
 		createClassFromList(userStory.getClasses());
-		//createClassFromList(userStory.getTest());
+		createClassFromList(userStory.getTests());
 	}
 
 	private void createClassFromList(List<StructuredClass> classes) {

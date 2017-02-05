@@ -9,21 +9,18 @@ public class StructuredClass {
 	private List<StructuredMethod> methods;
 	private List<StructuredConstrutor> constructors;
 	private List<StructuredAttribut> attributs;
-	private List<String> statements;
 	
 	public StructuredClass(String name) {
 		this.name = name;
 		methods = new ArrayList<StructuredMethod>();
 		constructors = new ArrayList<StructuredConstrutor>();
 		attributs = new ArrayList<StructuredAttribut>();
-		this.statements = new ArrayList<String>();
 	}
 
 	public StructuredClass() {
 		methods = new ArrayList<StructuredMethod>();
 		constructors = new ArrayList<StructuredConstrutor>();
 		attributs = new ArrayList<StructuredAttribut>();
-		statements = new ArrayList<String>();
 	}
 
 	public void addMethod(StructuredMethod method) {
@@ -87,18 +84,7 @@ public class StructuredClass {
 	public void setMethods(List<StructuredMethod> methods) {
 		this.methods = methods;
 	}
-	public List<String> getStatements() {
-		return statements;
-	}
-
-	public void setStatements(List<String> statements) {
-		this.statements = statements;
-	}
 	
-	public void addStatement(String statement) {
-		getStatements().add(statement);
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
