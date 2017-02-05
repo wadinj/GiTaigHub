@@ -82,7 +82,7 @@ public class UserStoryParser {
 			for(int i = 0; i < method.getArgs().length; i++) {
 				if(i > 0)
 					ifCondition += ", ";
-				ifCondition += method.getArgs()[i].split(" ")[1];
+				ifCondition += StringUtils.uncapitalize(method.getArgs()[i]);
 			}
 			ifCondition += ")";
 		} else {
@@ -270,7 +270,7 @@ public class UserStoryParser {
 			return null;
 		// choper ses arguments (les classes suivantes sur le statement)
 		while (matcher.find())
-			args.add(matcher.group().trim() + " " + StringUtils.uncapitalize(matcher.group().trim()));
+			args.add(matcher.group().trim());
 		String[] argsArray = new String[args.size()];
 		args.toArray(argsArray);
 
@@ -293,7 +293,7 @@ public class UserStoryParser {
 					new ArrayList<String>());
 			newClass.addConstructor(constructor);
 			newClass.addMethod(structuredMethod);
-		} else
+		} else 
 			structuredClasses.get(getIndexOfClass(structuredClasses, className)).addMethod(structuredMethod);
 		return structuredMethod;
 	}

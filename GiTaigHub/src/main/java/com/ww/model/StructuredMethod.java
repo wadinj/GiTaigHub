@@ -29,4 +29,5 @@ public class StructuredMethod extends AbstractStructuredMethod {
 	public void setReturnType(Class<?> returnType) {
 		this.returnType = returnType;
 	}	
+	
 }

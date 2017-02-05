@@ -24,7 +24,12 @@ public class StructuredClass {
 	}
 
 	public void addMethod(StructuredMethod method) {
-		methods.add(method);
+		boolean isNotAlreadyAClassMethod = true;
+		for(StructuredMethod structuredMethod : methods)
+			if(structuredMethod.equals(method))
+				isNotAlreadyAClassMethod = false;
+		if(isNotAlreadyAClassMethod)
+			methods.add(method);
 	}
 	
 	public void addMethods(List<StructuredMethod> methods) {
