@@ -10,7 +10,9 @@ public enum Keywords {
 	ENDIF("ENDIF"),
 	ONE("a "),
 	NONE("no "),
-	MANY(" many ");
+	MANY(" many "),
+	LESS(" is less than "),
+	MORE(" is more than ");
 	
 	private String name;
 	

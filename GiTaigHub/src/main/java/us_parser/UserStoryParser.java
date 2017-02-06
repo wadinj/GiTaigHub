@@ -77,6 +77,8 @@ public class UserStoryParser {
 			structuredTest.getStatements().add(0, initStatement);
 		}
 		structuredTestClass.addMethod(structuredTest);
+//		for(String s : structuredTest.getStatements())
+//			System.out.print(s);
 		tests.add(structuredTestClass);
 		return tests;
 	}
@@ -91,17 +93,25 @@ public class UserStoryParser {
 		Matcher matcher;
 		matcher = classNamePattern.matcher(statement);
 		if (!statement.contains(Keywords.HAS.getName())) {
-			StructuredMethod method = getMethod(structuredUserStory.getClasses(), statement);
-			if (matcher.find()) {
-				handleInitializationNeed(classesNameToInitialize, matcher.group());
-				ifCondition += StringUtils.uncapitalize(matcher.group()) + "." + method.getName() + "(";
+			if (statement.contains(Keywords.LESS.getName())) {
+				ifCondition += buildLessThanStatement(statement);
+			} else {
+				if (statement.contains(Keywords.MORE.getName())) {
+					ifCondition += buildMoreThanStatement(statement);
+				} else {
+					StructuredMethod method = getMethod(structuredUserStory.getClasses(), statement);
+					if (matcher.find()) {
+						handleInitializationNeed(classesNameToInitialize, matcher.group());
+						ifCondition += StringUtils.uncapitalize(matcher.group()) + "." + method.getName() + "(";
+					}
+					for (int i = 0; i < method.getArgs().length; i++) {
+						if (i > 0)
+							ifCondition += ", ";
+						ifCondition += StringUtils.uncapitalize(method.getArgs()[i]);
+					}
+					ifCondition += ")";
+				}
 			}
-			for (int i = 0; i < method.getArgs().length; i++) {
-				if (i > 0)
-					ifCondition += ", ";
-				ifCondition += StringUtils.uncapitalize(method.getArgs()[i]);
-			}
-			ifCondition += ")";
 		} else {
 			if (matcher.find()) {
 				handleInitializationNeed(classesNameToInitialize, matcher.group());
@@ -117,6 +127,22 @@ public class UserStoryParser {
 		return ifCondition;
 	}
 
+	private String buildLessThanStatement(String statement) {
+		String condition = buildAttributAccess(statement, Keywords.LESS.getName());
+		condition += " < ";
+		String valueTest = statement.substring(statement.indexOf(Keywords.LESS.getName()));
+		condition += valueTest.substring(Keywords.LESS.getName().length());
+		return condition;
+	}
+
+	private String buildMoreThanStatement(String statement) {
+		String condition = buildAttributAccess(statement, Keywords.MORE.getName());
+		condition += " > ";
+		String valueTest = statement.substring(statement.indexOf(Keywords.MORE.getName()));
+		condition += valueTest.substring(Keywords.MORE.getName().length());
+		return condition;
+	}
+
 	private void handleInitializationNeed(List<String> classesNameToInitialize, String className) {
 		boolean needToInitialize = true;
 		for (String name : classesNameToInitialize)
@@ -124,6 +150,33 @@ public class UserStoryParser {
 				needToInitialize = false;
 		if (needToInitialize)
 			classesNameToInitialize.add(className);
+	}
+	
+	private String buildAttributAccess(String statement, String testCondition) {
+		String condition = "";
+		String classParentName = "";
+		String classChildName = "";
+		String attributChildName = "";
+
+		Pattern classParentPattern = Pattern.compile("(([A-Z][a-z0-9]+)+)'s");
+		Pattern classChildPattern = Pattern.compile("('s ([A-Z][a-z0-9]+)+)");
+		Pattern attributChildPattern = Pattern.compile("([A-Z][a-z0-9]+)" + "(.*)" + testCondition);
+		Matcher classParentMatcher = classParentPattern.matcher(statement);
+		Matcher classChildMatcher = classChildPattern.matcher(statement);
+		Matcher attributChildMatcher = attributChildPattern.matcher(statement);
+		if (classParentMatcher.find())
+			classParentName = classParentMatcher.group().substring(0, classParentMatcher.group().length() - 2);
+		if (classChildMatcher.find())
+			classChildName = classChildMatcher.group().substring(3);
+		if (attributChildMatcher.find())
+			attributChildName = attributChildMatcher.group().substring(
+					classParentName.length() + classChildName.length() + 4,
+					attributChildMatcher.group().length() - testCondition.length());
+		condition = StringUtils.uncapitalize(classParentName);
+		if(classChildName != null && !classChildName.isEmpty())
+			condition += ".get" + classChildName + "()";
+		condition += ".get" + StringUtils.capitalize(attributChildName) + "()";
+		return condition;
 	}
 
 	private List<StructuredClass> getClassesDataFromUserStory(TaigaUserStory taigaUserStory) {
