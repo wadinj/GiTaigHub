@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ww.core.ThesaurusService;
 import com.ww.model.StructuredAttribut;
 import com.ww.model.StructuredClass;
 import com.ww.model.StructuredConstrutor;
 import com.ww.model.StructuredMethod;
 import com.ww.model.StructuredUserStory;
+import com.ww.model.ThesaurusResponse;
 import com.ww.utils.StringUtils;
 
 public class UserStoryParser {
@@ -77,8 +79,8 @@ public class UserStoryParser {
 			structuredTest.getStatements().add(0, initStatement);
 		}
 		structuredTestClass.addMethod(structuredTest);
-//		for(String s : structuredTest.getStatements())
-//			System.out.print(s);
+		// for(String s : structuredTest.getStatements())
+		// System.out.print(s);
 		tests.add(structuredTestClass);
 		return tests;
 	}
@@ -93,10 +95,10 @@ public class UserStoryParser {
 		Matcher matcher;
 		matcher = classNamePattern.matcher(statement);
 		if (!statement.contains(Keywords.HAS.getName())) {
-			if (statement.contains(Keywords.LESS.getName())) {
+			if (statement.contains(Keywords.LESS.getName()) || statement.contains(Keywords.INFERIOR.getName())) {
 				ifCondition += buildLessThanStatement(statement);
 			} else {
-				if (statement.contains(Keywords.MORE.getName())) {
+				if (statement.contains(Keywords.MORE.getName()) || statement.contains(Keywords.SUPERIOR.getName())) {
 					ifCondition += buildMoreThanStatement(statement);
 				} else {
 					StructuredMethod method = getMethod(structuredUserStory.getClasses(), statement);
@@ -128,18 +130,28 @@ public class UserStoryParser {
 	}
 
 	private String buildLessThanStatement(String statement) {
-		String condition = buildAttributAccess(statement, Keywords.LESS.getName());
+		String lessKeyword = null;
+		if (statement.contains(Keywords.LESS.getName()))
+			lessKeyword = Keywords.LESS.getName();
+		else
+			lessKeyword = Keywords.INFERIOR.getName();
+		String condition = buildAttributAccess(statement, lessKeyword);
 		condition += " < ";
-		String valueTest = statement.substring(statement.indexOf(Keywords.LESS.getName()));
-		condition += valueTest.substring(Keywords.LESS.getName().length());
+		String valueTest = statement.substring(statement.indexOf(lessKeyword));
+		condition += valueTest.substring(lessKeyword.length());
 		return condition;
 	}
 
 	private String buildMoreThanStatement(String statement) {
-		String condition = buildAttributAccess(statement, Keywords.MORE.getName());
+		String moreKeyword = null;
+		if (statement.contains(Keywords.MORE.getName()))
+			moreKeyword = Keywords.MORE.getName();
+		else
+			moreKeyword = Keywords.SUPERIOR.getName();
+		String condition = buildAttributAccess(statement, moreKeyword);
 		condition += " > ";
-		String valueTest = statement.substring(statement.indexOf(Keywords.MORE.getName()));
-		condition += valueTest.substring(Keywords.MORE.getName().length());
+		String valueTest = statement.substring(statement.indexOf(moreKeyword));
+		condition += valueTest.substring(moreKeyword.length());
 		return condition;
 	}
 
@@ -151,7 +163,7 @@ public class UserStoryParser {
 		if (needToInitialize)
 			classesNameToInitialize.add(className);
 	}
-	
+
 	private String buildAttributAccess(String statement, String testCondition) {
 		String condition = "";
 		String classParentName = "";
@@ -173,7 +185,7 @@ public class UserStoryParser {
 					classParentName.length() + classChildName.length() + 4,
 					attributChildMatcher.group().length() - testCondition.length());
 		condition = StringUtils.uncapitalize(classParentName);
-		if(classChildName != null && !classChildName.isEmpty())
+		if (classChildName != null && !classChildName.isEmpty())
 			condition += ".get" + classChildName + "()";
 		condition += ".get" + StringUtils.capitalize(attributChildName) + "()";
 		return condition;
@@ -181,7 +193,6 @@ public class UserStoryParser {
 
 	private List<StructuredClass> getClassesDataFromUserStory(TaigaUserStory taigaUserStory) {
 		List<StructuredClass> structuredClasses = new ArrayList<StructuredClass>();
-
 		List<String> statements = Arrays.asList(taigaUserStory.getDescription().split("\n"));
 		Matcher matcher;
 
@@ -203,9 +214,14 @@ public class UserStoryParser {
 				if (i++ == 0) // si c'est la première classe rencontrée dans le
 								// statement
 					if (statement.contains(Keywords.HAS.getName()))
-						handleStatementAttribut(statement, structuredClasses.get(index));
-					else
-						handleStatementMethod(structuredClasses, statement, structuredClasses.get(index));
+						handleStatementAttribut(statement, structuredClasses.get(index), Keywords.HAS.getName());
+					else {
+						String hasSynnonym = matchASynonym(statement, Keywords.HAS.getName());
+						if (hasSynnonym != null)
+							handleStatementAttribut(statement, structuredClasses.get(index), hasSynnonym);
+						else
+							handleStatementMethod(structuredClasses, statement, structuredClasses.get(index));
+					}
 			}
 			for (Keywords keyword : Keywords.values())
 				if (statement.equals(keyword.getName()))
@@ -215,6 +231,19 @@ public class UserStoryParser {
 			}
 		}
 		return structuredClasses;
+	}
+
+	private String matchASynonym(String statement, String name) {
+		// chercher les synonymes de name, et tester à chaque fois si le
+		// statement le contains, si oui, renvoyer
+		String matched = null;
+		ThesaurusResponse thesaurusResponse = new ThesaurusService().getSynonymousOfWord(name.trim());
+		if (thesaurusResponse != null) {
+		for (String syn : thesaurusResponse.getVerb().getSyn())
+			if(statement.contains(" " + syn + " "))
+				matched = " " + syn + " ";
+		}
+		return matched;
 	}
 
 	private void extractActionMethod(List<StructuredClass> structuredClasses, String statement) {
@@ -252,10 +281,10 @@ public class UserStoryParser {
 		return null;
 	}
 
-	private void handleStatementAttribut(String statement, StructuredClass parsedClass) {
-		String single = Keywords.HAS.getName() + Keywords.ONE.getName();
-		String many = Keywords.HAS.getName() + Keywords.MANY.getName();
-		String none = Keywords.HAS.getName() + Keywords.NONE.getName();
+	private void handleStatementAttribut(String statement, StructuredClass parsedClass, String hasKeyword) {
+		String single = hasKeyword + Keywords.ONE.getName();
+		String many = hasKeyword + Keywords.MANY.getName();
+		String none = hasKeyword + Keywords.NONE.getName();
 		String then = Keywords.THEN.getName();
 
 		String attributClassName = null;

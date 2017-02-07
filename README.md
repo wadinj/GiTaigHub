@@ -35,3 +35,73 @@ ENDIF
 Will create four classes Customer, BankAccount, BankManagement and Dues which represent the entities.
 
 To be continued...
+
+Example of Structured English : 
+
+
+UserStory : Ticketing system aotumatic affectation
+```
+TicketingSystem can affect automatically to the appropriate team
+The ticket can be dispatch to 3 different teams :
+   - L1 : First Level team
+   - L2 : Second level team
+   - L3 : Third level team
+The ticket can be set with several properties :
+   - Emergency : Low, Medium, High
+   - Environment : Integration, Approval, preproduction
+   - Skill needed : System, Middleware, Network
+   - Level of skills needed : Easy, Medium, hard
+   - Description : A text which represents the operation
+   - Server URL
+ The ticket is represented by an unique id
+   IF Ticket is set on Integration environment THEN
+      IF Skill needed for the ticket is System THEN
+         IF level of skills needed is easy THEN
+            Add ticket to L1 System
+         ELSE IF level of skills needed is medium or hard THEN
+            Add ticket to L2 System
+         END IF
+      END IF
+      IF Skill needed for the ticket is Middleware THEN
+         IF level of skills needed is easy THEN
+            Add ticket to L1 System
+         ELSE IF level of skills needed is medium or hard THEN
+            Add ticket to L2 System
+         END IF
+      END IF
+   ELSE IF ticket is set on Approval environment THEN
+         IF Skill needed for the ticket is System THEN
+            IF level of skills needed is easy THEN
+               Add ticket to L2 System
+            ELSE IF level of skills needed is medium THEN
+               Add ticket to L2 System
+            ELSE
+               Add ticket to L3 System
+            END IF
+         END IF
+      IF Skill needed for the ticket is Middleware THEN
+         IF level of skills needed is easy THEN
+               Add ticket to L2 Middleware
+            ELSE IF level of skills needed is medium THEN
+               Add ticket to L2 Middleware
+            ELSE
+               Add ticket to L3 Middleware
+            END IF
+      END IF
+  ELSE
+      IF Skill needed for the ticket is System THEN
+            IF level of skills needed is easy THEN
+               Add ticket to L2 System
+            ELSE IF level of skills needed is medium or hard THEN
+               Add ticket to L3 System
+            END IF
+      END IF
+      IF Skill needed for the ticket is Middleware THEN
+            IF level of skills needed is easy THEN
+               Add ticket to L2 Middleware
+            ELSE IF level of skills needed is medium or hard THEN
+               Add ticket to L3 Middleware
+            END IF
+      END IF
+  END IF
+```
