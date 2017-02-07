@@ -14,8 +14,9 @@ public class Main {
 		UserStoryParser userStoryParser = new UserStoryParser();
 		userStoryParser.parseUserStory(service.getUserStory("2"));
 		StructuredUserStory structuredUs = userStoryParser.getStructuredUserStory();
-		//CodeGeneratorService generator = new CodeGeneratorService();
-//		generator.generateCodeFromStructuredUserStory(structuredUs);
+		CodeGeneratorService generator = new CodeGeneratorService();
+		generator.generateCodeFromStructuredUserStory(structuredUs);
+		System.out.println(new ThesaurusService().getSynonymousOfWord("can"));
 	}
 
 }
