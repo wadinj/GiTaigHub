@@ -12,7 +12,7 @@ public class GiTaigHubPropertiesUtils {
 	private static ResourceBundle resource;
 	private static GiTaigHubPropertiesUtils instance;
 	private static final String PROPERTIES_NAME = "giTaigHub";
-
+	public static final String THESAURUS_URL = "thesaurusUrl";
 	private GiTaigHubPropertiesUtils() {
 		resource = ResourceBundle.getBundle(PROPERTIES_NAME);
 	}
