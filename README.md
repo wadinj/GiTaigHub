@@ -37,7 +37,9 @@ Will create four classes Customer, BankAccount, BankManagement and Dues which re
 To be continued...
 
 Example of Structured English : 
-UserStory : Cashier can add products to basket
+
+
+UserStory : Ticketing system aotumatic affectation
 ```
 Ticketing system can affect automatically to the appropriate team.
 The ticket can be dispatch to 3 differents teams :
