@@ -212,10 +212,10 @@ public class UserStoryParser {
 				if (i++ == 0) // si c'est la première classe rencontrée dans le
 								// statement
 					if (statement.contains(Keywords.HAS.getName()))
-						handleStatementAttribut(statement, structuredClasses.get(index));
+						handleStatementAttribut(statement, structuredClasses.get(index), Keywords.HAS.getName());
 					else {
-						String hasSynnonym = matchASynonym(statement, Keywords.HAS.getName()));
-						handleStatementAttribut(statement, structuredClasses.get(index));
+						String hasSynnonym = matchASynonym(statement, Keywords.HAS.getName());
+						handleStatementAttribut(statement, structuredClasses.get(index), hasSynnonym);
 					}
 						else
 							handleStatementMethod(structuredClasses, statement, structuredClasses.get(index));
@@ -231,7 +231,7 @@ public class UserStoryParser {
 	}
 
 	private String matchASynonym(String statement, String name) {
-		// TODO Auto-generated method stub
+		//chercher les synonymes de name, et tester à chaque fois si le statement le contains, si oui, renvoyer 
 		return null;
 	}
 
@@ -270,10 +270,10 @@ public class UserStoryParser {
 		return null;
 	}
 
-	private void handleStatementAttribut(String statement, StructuredClass parsedClass) {
-		String single = Keywords.HAS.getName() + Keywords.ONE.getName();
-		String many = Keywords.HAS.getName() + Keywords.MANY.getName();
-		String none = Keywords.HAS.getName() + Keywords.NONE.getName();
+	private void handleStatementAttribut(String statement, StructuredClass parsedClass, String hasKeyword) {
+		String single = hasKeyword + Keywords.ONE.getName();
+		String many = hasKeyword + Keywords.MANY.getName();
+		String none = hasKeyword + Keywords.NONE.getName();
 		String then = Keywords.THEN.getName();
 
 		String attributClassName = null;
