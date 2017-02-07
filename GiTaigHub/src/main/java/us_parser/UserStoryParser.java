@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ww.core.ThesaurusService;
 import com.ww.model.StructuredAttribut;
 import com.ww.model.StructuredClass;
 import com.ww.model.StructuredConstrutor;
 import com.ww.model.StructuredMethod;
 import com.ww.model.StructuredUserStory;
+import com.ww.model.ThesaurusResponse;
 import com.ww.utils.StringUtils;
 
 public class UserStoryParser {
@@ -215,10 +217,11 @@ public class UserStoryParser {
 						handleStatementAttribut(statement, structuredClasses.get(index), Keywords.HAS.getName());
 					else {
 						String hasSynnonym = matchASynonym(statement, Keywords.HAS.getName());
-						handleStatementAttribut(statement, structuredClasses.get(index), hasSynnonym);
-					}
+						if (hasSynnonym != null)
+							handleStatementAttribut(statement, structuredClasses.get(index), hasSynnonym);
 						else
 							handleStatementMethod(structuredClasses, statement, structuredClasses.get(index));
+					}
 			}
 			for (Keywords keyword : Keywords.values())
 				if (statement.equals(keyword.getName()))
@@ -231,8 +234,16 @@ public class UserStoryParser {
 	}
 
 	private String matchASynonym(String statement, String name) {
-		//chercher les synonymes de name, et tester à chaque fois si le statement le contains, si oui, renvoyer 
-		return null;
+		// chercher les synonymes de name, et tester à chaque fois si le
+		// statement le contains, si oui, renvoyer
+		String matched = null;
+		ThesaurusResponse thesaurusResponse = new ThesaurusService().getSynonymousOfWord(name.trim());
+		if (thesaurusResponse != null) {
+		for (String syn : thesaurusResponse.getVerb().getSyn())
+			if(statement.contains(" " + syn + " "))
+				matched = " " + syn + " ";
+		}
+		return matched;
 	}
 
 	private void extractActionMethod(List<StructuredClass> structuredClasses, String statement) {
