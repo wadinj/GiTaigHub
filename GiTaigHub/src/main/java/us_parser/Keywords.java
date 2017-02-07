@@ -12,7 +12,9 @@ public enum Keywords {
 	NONE("no "),
 	MANY(" many "),
 	LESS(" is less than "),
-	MORE(" is more than ");
+	MORE(" is more than "),
+	SUPERIOR(" > "),
+	INFERIOR(" < ");
 	
 	private String name;
 	
