@@ -41,19 +41,19 @@ Example of Structured English :
 
 UserStory : Ticketing system aotumatic affectation
 ```
-Ticketing system can affect automatically to the appropriate team.
-The ticket can be dispatch to 3 differents teams :
+TicketingSystem can affect automatically to the appropriate team
+The ticket can be dispatch to 3 different teams :
    - L1 : First Level team
    - L2 : Second level team
    - L3 : Third level team
-The ticket could be set with several properties :
-   - Emergency : Low, Medium or High
-   - Environment : Integration, Approval, pre-production
+The ticket can be set with several properties :
+   - Emergency : Low, Medium, High
+   - Environment : Integration, Approval, preproduction
    - Skill needed : System, Middleware, Network
-   - Level of skills needed : Easy, Medium or hard
+   - Level of skills needed : Easy, Medium, hard
    - Description : A text which represents the operation
    - Server URL
- The ticket is represented by an unique id.
+ The ticket is represented by an unique id
    IF Ticket is set on Integration environment THEN
       IF Skill needed for the ticket is System THEN
          IF level of skills needed is easy THEN
