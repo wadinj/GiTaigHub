@@ -1,4 +1,4 @@
-package us_parser;
+package com.ww.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,17 +6,18 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.ww.core.ThesaurusService;
 import com.ww.model.AbstractStructuredMethod;
 import com.ww.model.StructuredAttribut;
 import com.ww.model.StructuredClass;
 import com.ww.model.StructuredConstrutor;
 import com.ww.model.StructuredMethod;
 import com.ww.model.StructuredUserStory;
+import com.ww.model.TaigaUserStory;
 import com.ww.model.ThesaurusResponse;
+import com.ww.utils.Keywords;
 import com.ww.utils.StringUtils;
 
-public class UserStoryParser {
+public class UserStoryParserService {
 	private StructuredUserStory structuredUserStory;
 	private static String classPattern = "([A-Z][a-z0-9]+)+";
 	private Pattern classNamePattern = Pattern.compile(classPattern);
