@@ -1,4 +1,4 @@
-package us_parser;
+package com.ww.utils;
 
 public enum Keywords {
 	CAN(" can "),
