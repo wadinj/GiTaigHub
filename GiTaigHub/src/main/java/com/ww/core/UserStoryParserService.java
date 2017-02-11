@@ -98,22 +98,27 @@ public class UserStoryParserService {
 		matcher = classNamePattern.matcher(statement);
 		if (!statement.contains(Keywords.HAS.getName())) {
 			if (statement.contains(Keywords.LESS.getName()) || statement.contains(Keywords.INFERIOR.getName())) {
-				ifCondition += buildLessThanStatement(statement);
+				ifCondition += buildLessThanStatement(statement, classesNameToInitialize);
 			} else {
 				if (statement.contains(Keywords.MORE.getName()) || statement.contains(Keywords.SUPERIOR.getName())) {
-					ifCondition += buildMoreThanStatement(statement);
+					ifCondition += buildMoreThanStatement(statement, classesNameToInitialize);
 				} else {
-					StructuredMethod method = getMethod(structuredUserStory.getClasses(), statement);
-					if (matcher.find()) {
-						handleInitializationNeed(classesNameToInitialize, matcher.group());
-						ifCondition += StringUtils.uncapitalize(matcher.group()) + "." + method.getName() + "(";
+					if (statement.contains(Keywords.EQUALS.getName()) || statement.contains(Keywords.IS_SET_ON.getName())
+							|| statement.contains(Keywords.IS.getName())) {
+						ifCondition += buildEqualsStatement(statement, classesNameToInitialize);
+					} else {
+						StructuredMethod method = getMethod(structuredUserStory.getClasses(), statement);
+						if (matcher.find()) {
+							handleInitializationNeed(classesNameToInitialize, matcher.group());
+							ifCondition += StringUtils.uncapitalize(matcher.group()) + "." + method.getName() + "(";
+						}
+						for (int i = 0; i < method.getArgs().length; i++) {
+							if (i > 0)
+								ifCondition += ", ";
+							ifCondition += StringUtils.uncapitalize(method.getArgs()[i]);
+						}
+						ifCondition += ")";
 					}
-					for (int i = 0; i < method.getArgs().length; i++) {
-						if (i > 0)
-							ifCondition += ", ";
-						ifCondition += StringUtils.uncapitalize(method.getArgs()[i]);
-					}
-					ifCondition += ")";
 				}
 			}
 		} else {
@@ -131,26 +136,65 @@ public class UserStoryParserService {
 		return ifCondition;
 	}
 
-	private String buildLessThanStatement(String statement) {
+	private String buildLessThanStatement(String statement, List<String> classesNameToInitialize) {
 		String lessKeyword = null;
 		if (statement.contains(Keywords.LESS.getName()))
 			lessKeyword = Keywords.LESS.getName();
 		else
 			lessKeyword = Keywords.INFERIOR.getName();
-		String condition = buildAttributAccess(statement, lessKeyword);
+		String condition = buildAttributAccess(statement, lessKeyword, classesNameToInitialize);
 		condition += " < ";
 		String valueTest = statement.substring(statement.indexOf(lessKeyword));
 		condition += valueTest.substring(lessKeyword.length());
 		return condition;
 	}
 
-	private String buildMoreThanStatement(String statement) {
+	private String buildEqualsStatement(String statement, List<String> classesNameToInitialize) {
+		String or = Keywords.OR.getName();
+		String equalsKeyword = null;
+		boolean needToUseEquals = false;
+		if (statement.contains(Keywords.IS_SET_ON.getName())) {
+			equalsKeyword = Keywords.IS_SET_ON.getName();
+			needToUseEquals = true;
+		} else if (statement.contains(Keywords.IS.getName())) {
+			equalsKeyword = Keywords.IS.getName();
+			needToUseEquals = true;
+		} else
+			equalsKeyword = Keywords.EQUALS.getName();
+		String attributAccess = buildAttributAccess(statement, equalsKeyword, classesNameToInitialize);
+		String condition = "";
+		String statementValueTest = statement.substring(statement.indexOf(equalsKeyword) + equalsKeyword.length());
+		int nbOfOr = org.springframework.util.StringUtils.countOccurrencesOf(statementValueTest, or);
+		do {
+			String valueTest = null;
+			if(nbOfOr > 0) {
+				valueTest = statementValueTest.substring(0, statementValueTest.indexOf(or));
+				statementValueTest = statementValueTest.substring(statementValueTest.indexOf(or) + or.length());
+			}
+			else 
+				valueTest = statementValueTest;
+			condition += attributAccess;
+			if (needToUseEquals) {
+				condition += ".equals(";
+				condition += "\"" + valueTest + "\"";
+				condition += ")";
+			} else {
+				condition += " = ";
+				condition += valueTest.substring(equalsKeyword.length());
+			}
+			if(nbOfOr-- > 0)
+				condition += " || ";
+		} while(nbOfOr >= 0);
+		return condition;
+	}
+
+	private String buildMoreThanStatement(String statement, List<String> classesNameToInitialize) {
 		String moreKeyword = null;
 		if (statement.contains(Keywords.MORE.getName()))
 			moreKeyword = Keywords.MORE.getName();
 		else
 			moreKeyword = Keywords.SUPERIOR.getName();
-		String condition = buildAttributAccess(statement, moreKeyword);
+		String condition = buildAttributAccess(statement, moreKeyword, classesNameToInitialize);
 		condition += " > ";
 		String valueTest = statement.substring(statement.indexOf(moreKeyword));
 		condition += valueTest.substring(moreKeyword.length());
@@ -158,6 +202,8 @@ public class UserStoryParserService {
 	}
 
 	private void handleInitializationNeed(List<String> classesNameToInitialize, String className) {
+		if(className.isEmpty())
+			return;
 		boolean needToInitialize = true;
 		for (String name : classesNameToInitialize)
 			if (name.equals(className))
@@ -166,7 +212,7 @@ public class UserStoryParserService {
 			classesNameToInitialize.add(className);
 	}
 
-	private String buildAttributAccess(String statement, String testCondition) {
+	private String buildAttributAccess(String statement, String testCondition, List<String> classesNameToInitialize) {
 		String condition = "";
 		String classParentName = "";
 		String classChildName = "";
@@ -184,12 +230,14 @@ public class UserStoryParserService {
 			classChildName = classChildMatcher.group().substring(3);
 		if (attributChildMatcher.find())
 			attributChildName = attributChildMatcher.group().substring(
-					classParentName.length() + classChildName.length() + 4,
+					classParentName.length() + classChildName.length() + (classChildName.length() > 0 ? 4 : 3),
 					attributChildMatcher.group().length() - testCondition.length());
 		condition = StringUtils.uncapitalize(classParentName);
 		if (classChildName != null && !classChildName.isEmpty())
 			condition += ".get" + classChildName + "()";
 		condition += ".get" + StringUtils.capitalize(attributChildName) + "()";
+		handleInitializationNeed(classesNameToInitialize, classChildName);
+		handleInitializationNeed(classesNameToInitialize, classParentName);
 		return condition;
 	}
 
@@ -217,13 +265,17 @@ public class UserStoryParserService {
 								// statement
 					if (statement.contains(Keywords.HAS.getName()))
 						handleStatementAttribut(statement, structuredClasses.get(index), Keywords.HAS.getName());
-					else {
-						String hasSynnonym = matchASynonym(statement, Keywords.HAS.getName());
-						if (hasSynnonym != null)
-							handleStatementAttribut(statement, structuredClasses.get(index), hasSynnonym);
-						else
-							handleStatementMethod(structuredClasses, statement, structuredClasses.get(index));
-					}
+					else 
+						if(statement.contains(Keywords.OWNS.getName())) {
+							handleStatementAttributOwn(statement, structuredClasses.get(index), structuredClasses);
+						}
+						else {
+							String hasSynnonym = matchASynonym(statement, Keywords.HAS.getName());
+							if (hasSynnonym != null)
+								handleStatementAttribut(statement, structuredClasses.get(index), hasSynnonym);
+							else
+								handleStatementMethod(structuredClasses, statement, structuredClasses.get(index));
+						}
 			}
 			for (Keywords keyword : Keywords.values())
 				if (statement.equals(keyword.getName()))
@@ -232,7 +284,58 @@ public class UserStoryParserService {
 				extractActionMethod(structuredClasses, statement);
 			}
 		}
+		
+		for(StructuredClass classe : structuredClasses)
+			for(StructuredAttribut attribut : classe.getAttributs())
+				for(StructuredClass otherClass : structuredClasses)
+					if(otherClass.getName().equals(StringUtils.capitalize(attribut.getName())))
+						attribut.setType(otherClass.getName());
 		return structuredClasses;
+	}
+
+	private void handleStatementAttributOwn(String statement, StructuredClass structuredClass, List<StructuredClass> structuredClasses) {
+			String classParentName = "";
+			String classChildName = "";
+			String attributChildName = "";
+			String testCondition = "";
+			
+			if (statement.contains(Keywords.EQUALS.getName()))
+					testCondition = Keywords.EQUALS.getName();
+			else if(statement.contains(Keywords.IS.getName()))
+				testCondition = Keywords.IS.getName();
+			else 
+				testCondition = Keywords.IS_SET_ON.getName();
+
+			Pattern classParentPattern = Pattern.compile("(([A-Z][a-z0-9]+)+)'s");
+			Pattern classChildPattern = Pattern.compile("('s ([A-Z][a-z0-9]+)+)");
+			Pattern attributChildPattern = Pattern.compile("([A-Z][a-z0-9]+)" + "(.*)" + testCondition);
+			Matcher classParentMatcher = classParentPattern.matcher(statement);
+			Matcher classChildMatcher = classChildPattern.matcher(statement);
+			Matcher attributChildMatcher = attributChildPattern.matcher(statement);
+			if (classParentMatcher.find())
+				classParentName = classParentMatcher.group().substring(0, classParentMatcher.group().length() - 2);
+			if (classChildMatcher.find())
+				classChildName = classChildMatcher.group().substring(3);
+			if (attributChildMatcher.find())
+				attributChildName = attributChildMatcher.group().substring(
+						classParentName.length() + classChildName.length() + 3,
+						attributChildMatcher.group().length() - testCondition.length());
+			String type = "String";
+			if(statement.matches(".*\\d+.*"))
+				type = "Integer";
+			if(statement.matches(".*\\d\\.\\d+.*"))
+				type = "Double";
+			StructuredAttribut structuredAttribut = new StructuredAttribut(type, attributChildName.trim());
+			String classNameToAddAttribute = "";
+			if(classChildName != null  && !classChildName.isEmpty())
+				classNameToAddAttribute = classChildName;
+			else 
+				classNameToAddAttribute = classParentName;
+			for(StructuredClass classe : structuredClasses)
+				if(classe.getName().equals(classNameToAddAttribute))
+					if(!classe.getAttributs().contains(structuredAttribut))
+						classe.addAttribut(structuredAttribut);
+			
 	}
 
 	private String matchASynonym(String statement, String name) {
@@ -241,9 +344,9 @@ public class UserStoryParserService {
 		String matched = null;
 		ThesaurusResponse thesaurusResponse = new ThesaurusService().getSynonymousOfWord(name.trim());
 		if (thesaurusResponse != null && thesaurusResponse.getVerb() != null) {
-		for (String syn : thesaurusResponse.getVerb().getSyn())
-			if(statement.contains(" " + syn + " "))
-				matched = " " + syn + " ";
+			for (String syn : thesaurusResponse.getVerb().getSyn())
+				if (statement.contains(" " + syn + " "))
+					matched = " " + syn + " ";
 		}
 		return matched;
 	}

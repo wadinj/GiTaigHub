@@ -14,7 +14,12 @@ public enum Keywords {
 	LESS(" is less than "),
 	MORE(" is more than "),
 	SUPERIOR(" > "),
-	INFERIOR(" < ");
+	INFERIOR(" < "),
+	EQUALS(" = "),
+	IS(" is "),
+	IS_SET_ON(" is set on "),
+	OWNS("'s "),
+	OR(" or ");
 	
 	private String name;
 	
