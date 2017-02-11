@@ -8,9 +8,10 @@ public class Main {
 		String usernameTaiga = args[0];
 		String passwordTaiga = args[1];
 		String projectTaiga = args[2];
+		String userStoryNumber = args[3];
 		TaigaService service = new TaigaService(usernameTaiga, passwordTaiga, projectTaiga);
 		UserStoryParserService userStoryParser = new UserStoryParserService();
-		userStoryParser.parseUserStory(service.getUserStory("1"));
+		userStoryParser.parseUserStory(service.getUserStory(userStoryNumber));
 		StructuredUserStory structuredUs = userStoryParser.getStructuredUserStory();
 		CodeGeneratorService generator = new CodeGeneratorService();
 		generator.generateCodeFromStructuredUserStory(structuredUs);
