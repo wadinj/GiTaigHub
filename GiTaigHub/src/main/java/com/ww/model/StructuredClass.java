@@ -3,6 +3,8 @@ package com.ww.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ww.utils.Keywords;
+
 public class StructuredClass {
 
 	private String name;
@@ -24,11 +26,14 @@ public class StructuredClass {
 	}
 
 	public void addMethod(AbstractStructuredMethod method) {
-		boolean isNotAlreadyAClassMethod = true;
+		boolean needsToBeAdd = true;
 		for(AbstractStructuredMethod structuredMethod : methods)
 			if(structuredMethod.equals(method))
-				isNotAlreadyAClassMethod = false;
-		if(isNotAlreadyAClassMethod)
+				needsToBeAdd = false;
+		for (Keywords keyword : Keywords.values())
+			if (method.getName().equals(keyword.getName().trim()))
+				needsToBeAdd = false;
+		if(needsToBeAdd)
 			methods.add(method);
 	}
 	

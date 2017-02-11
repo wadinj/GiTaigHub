@@ -52,12 +52,13 @@ public class UserStoryParserService {
 						isASimpleStatement = false;
 				if (isASimpleStatement) {
 					handleInitializationNeed(classesNameToInitialize, userStoryClass.getName());
-					String testStatement = "\nassertTrue(" + StringUtils.uncapitalize(userStoryClass.getName()) + "."
-							+ StringUtils.stringAsMethodName(statement) + "(";
-					if (userStoryArgClassName != null && !userStoryArgClassName.isEmpty())
-						testStatement += StringUtils.uncapitalize(userStoryArgClassName);
-					testStatement += "));\n";
-					structuredTest.addStatement(testStatement);
+					Matcher matcher;
+					matcher = classNamePattern.matcher(statement);
+					if(!matcher.find()) {
+						extractSimpleAssertion(structuredTest, statement);
+					} else { 
+						extractComplexAssertion(classesNameToInitialize, structuredTest, statement, matcher);
+					}
 				}
 				if (statement.startsWith(Keywords.IF.getName())) {
 					structuredTest.addStatement("\nif(");
@@ -85,6 +86,45 @@ public class UserStoryParserService {
 		// System.out.print(s);
 		tests.add(structuredTestClass);
 		return tests;
+	}
+
+	private void extractComplexAssertion(List<String> classesNameToInitialize, StructuredMethod structuredTest, String statement, Matcher matcher) {
+		String testStatement = "\nassertTrue(" + StringUtils.uncapitalize(userStoryClass.getName()) + ".";
+		
+		Pattern patternActionMethod;
+		Matcher matcherActionMethod;
+		String testName = "";
+		String[] args = new String[matcher.groupCount() + 1];
+		int argsIndex = 0;
+		int startIndex = 0;
+		do {
+			patternActionMethod = Pattern.compile("( " + matcher.group() + ")");
+			matcherActionMethod = patternActionMethod.matcher(statement);
+			if(matcherActionMethod.find())
+				testName += statement.substring(startIndex, statement.indexOf(matcherActionMethod.group()));
+			startIndex = statement.indexOf(matcher.group()) + matcher.group().length();
+			args[argsIndex++] = matcher.group().trim();
+		} while (matcher.find());
+
+		testStatement += StringUtils.stringAsMethodName(testName) + "(";
+		for(int i = 0; i < args.length; i++) {
+			handleInitializationNeed(classesNameToInitialize, args[i]);
+			testStatement += StringUtils.uncapitalize(args[i]);
+			if((args.length == 2 && i == 0) || (i > 0) && i < args.length - 1)
+				testStatement += ", ";
+		}
+			
+		testStatement += "));\n";
+		structuredTest.addStatement(testStatement);
+	}
+
+	private void extractSimpleAssertion(StructuredMethod structuredTest, String statement) {
+		String testStatement = "\nassertTrue(" + StringUtils.uncapitalize(userStoryClass.getName()) + "."
+				+ StringUtils.stringAsMethodName(statement) + "(";
+		if (userStoryArgClassName != null && !userStoryArgClassName.isEmpty())
+			testStatement += StringUtils.uncapitalize(userStoryArgClassName);
+		testStatement += "));\n";
+		structuredTest.addStatement(testStatement);
 	}
 
 	private String buildIfCondition(StructuredUserStory structuredUserStory, String statement,
@@ -250,9 +290,9 @@ public class UserStoryParserService {
 			statement = statement.trim();
 			matcher = classNamePattern.matcher(statement);
 			int i = 0;
-			boolean isASmpleStatement = true;
+			boolean isASimpleStatement = false;
 			while (matcher.find()) {
-				isASmpleStatement = false;
+//				isASimpleStatement = false;
 				StructuredClass parsedClass = new StructuredClass(matcher.group().trim());
 				if (!structuredClasses.contains(parsedClass)) {
 					structuredClasses.add(0, parsedClass);
@@ -278,9 +318,9 @@ public class UserStoryParserService {
 						}
 			}
 			for (Keywords keyword : Keywords.values())
-				if (statement.equals(keyword.getName()))
-					isASmpleStatement = false;
-			if (isASmpleStatement) {
+				if (statement.contains(keyword.getName()) && !keyword.equals(Keywords.TO))
+					isASimpleStatement = true;
+			if (!isASimpleStatement) {
 				extractActionMethod(structuredClasses, statement);
 			}
 		}
@@ -352,6 +392,35 @@ public class UserStoryParserService {
 	}
 
 	private void extractActionMethod(List<StructuredClass> structuredClasses, String statement) {
+		Matcher matcher;
+		matcher = classNamePattern.matcher(statement);
+		if(!matcher.find()) {
+			extractSimpleActionMethod(structuredClasses, statement);
+		} else { 
+			extractComplexActionMethod(structuredClasses, statement, matcher);
+		}
+	}
+
+	private void extractComplexActionMethod(List<StructuredClass> structuredClasses, String statement, Matcher matcher) {
+		Pattern patternActionMethod;
+		Matcher matcherActionMethod;
+		String methodName = "";
+		String[] args = new String[matcher.groupCount() + 1];
+		int argsIndex = 0;
+		int startIndex = 0;
+		do {
+			patternActionMethod = Pattern.compile("( " + matcher.group() + ")");
+			matcherActionMethod = patternActionMethod.matcher(statement);
+			if(matcherActionMethod.find())
+				methodName += statement.substring(startIndex, statement.indexOf(matcherActionMethod.group()));
+			startIndex = statement.indexOf(matcher.group()) + matcher.group().length();
+			args[argsIndex++] = matcher.group().trim();
+		} while (matcher.find());
+		String actionMethodName = StringUtils.stringAsMethodName(methodName);
+		userStoryClass.addMethod(new StructuredMethod(actionMethodName, getMethodReturnType(statement), args));
+	}
+
+	private void extractSimpleActionMethod(List<StructuredClass> structuredClasses, String statement) {
 		boolean methodAlreadyParsed = false;
 		String actionMethodName = StringUtils.stringAsMethodName(statement);
 		for (AbstractStructuredMethod method : userStoryClass.getMethods())
