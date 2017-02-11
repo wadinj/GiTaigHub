@@ -78,7 +78,7 @@ public class CodeGeneratorService {
 					isTestClass = true;
 				} else {
 					currentMethodBuilder.addComment("TODO: not yet implemented \n", new Object[] {});
-					currentMethodBuilder.addCode("return null;");
+					currentMethodBuilder.addCode("return null;\n");
 				}
 				currentClassBuilder.addMethod(currentMethodBuilder.build());
 			}
