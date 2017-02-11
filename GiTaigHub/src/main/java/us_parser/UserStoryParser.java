@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.ww.core.ThesaurusService;
+import com.ww.model.AbstractStructuredMethod;
 import com.ww.model.StructuredAttribut;
 import com.ww.model.StructuredClass;
 import com.ww.model.StructuredConstrutor;
@@ -249,7 +250,7 @@ public class UserStoryParser {
 	private void extractActionMethod(List<StructuredClass> structuredClasses, String statement) {
 		boolean methodAlreadyParsed = false;
 		String actionMethodName = StringUtils.stringAsMethodName(statement);
-		for (StructuredMethod method : userStoryClass.getMethods())
+		for (AbstractStructuredMethod method : userStoryClass.getMethods())
 			if (method.getName().equals(actionMethodName))
 				methodAlreadyParsed = true;
 		if (!methodAlreadyParsed) {

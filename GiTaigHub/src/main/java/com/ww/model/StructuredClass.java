@@ -6,33 +6,33 @@ import java.util.List;
 public class StructuredClass {
 
 	private String name;
-	private List<StructuredMethod> methods;
+	private List<AbstractStructuredMethod> methods;
 	private List<StructuredConstrutor> constructors;
 	private List<StructuredAttribut> attributs;
 	
 	public StructuredClass(String name) {
 		this.name = name;
-		methods = new ArrayList<StructuredMethod>();
+		methods = new ArrayList<AbstractStructuredMethod>();
 		constructors = new ArrayList<StructuredConstrutor>();
 		attributs = new ArrayList<StructuredAttribut>();
 	}
 
 	public StructuredClass() {
-		methods = new ArrayList<StructuredMethod>();
+		methods = new ArrayList<AbstractStructuredMethod>();
 		constructors = new ArrayList<StructuredConstrutor>();
 		attributs = new ArrayList<StructuredAttribut>();
 	}
 
-	public void addMethod(StructuredMethod method) {
+	public void addMethod(AbstractStructuredMethod method) {
 		boolean isNotAlreadyAClassMethod = true;
-		for(StructuredMethod structuredMethod : methods)
+		for(AbstractStructuredMethod structuredMethod : methods)
 			if(structuredMethod.equals(method))
 				isNotAlreadyAClassMethod = false;
 		if(isNotAlreadyAClassMethod)
 			methods.add(method);
 	}
 	
-	public void addMethods(List<StructuredMethod> methods) {
+	public void addMethods(List<AbstractStructuredMethod> methods) {
 		this.methods.addAll(methods);
 	}
 	
@@ -60,7 +60,7 @@ public class StructuredClass {
 		this.name = name;
 	}
 	
-	public List<StructuredMethod> getMethods() {
+	public List<AbstractStructuredMethod> getMethods() {
 		return methods;
 	}
 	
@@ -81,7 +81,7 @@ public class StructuredClass {
 		this.attributs = attributs;
 	}
 
-	public void setMethods(List<StructuredMethod> methods) {
+	public void setMethods(List<AbstractStructuredMethod> methods) {
 		this.methods = methods;
 	}
 	

@@ -3,23 +3,9 @@ package com.ww.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
 import javax.lang.model.element.Modifier;
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -29,10 +15,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
+import com.ww.model.AbstractStructuredMethod;
 import com.ww.model.StructuredAttribut;
 import com.ww.model.StructuredClass;
 import com.ww.model.StructuredConstrutor;
-import com.ww.model.StructuredMethod;
 import com.ww.model.StructuredUserStory;
 import com.ww.utils.GiTaigHubPropertiesUtils;
 
@@ -70,7 +56,7 @@ public class CodeGeneratorService {
 		for(StructuredClass structuredClass : classes) {
 			currentClassBuilder = TypeSpec.classBuilder(structuredClass.getName()).addModifiers(Modifier.PUBLIC);
 			// Building all methods
-			for(StructuredMethod structuredMethod : structuredClass.getMethods()) {
+			for(AbstractStructuredMethod structuredMethod : structuredClass.getMethods()) {
 				LOGGER.debug("Method => " + structuredMethod.getName());
 				currentMethodBuilder = MethodSpec.methodBuilder(structuredMethod.getName()).addModifiers(Modifier.PUBLIC);
 				if(structuredMethod.getAnnotation() != null) {

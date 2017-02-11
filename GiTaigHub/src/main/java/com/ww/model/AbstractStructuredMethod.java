@@ -3,7 +3,7 @@ package com.ww.model;
 import java.util.Arrays;
 import java.util.List;
 
-public class AbstractStructuredMethod {
+public abstract class AbstractStructuredMethod {
 
 	private String[] args;
 	private Class<?> annotation;
@@ -81,5 +81,7 @@ public class AbstractStructuredMethod {
 			return false;
 		return true;
 	}
+	
+	public abstract Class<?> getReturnType();
 	
 }
