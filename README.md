@@ -13,7 +13,7 @@ Here we are trying to automate tests from the first document which describes the
 
 To get this description, we use automatic Taiga.io bridge to allow the user to directly convert his user stories to TDD code and unit test.
 
-This soft is capable to convert Structured English to code.
+This software is able to convert Structured English to code.
 Per example :
 ```
 BankManagement can allow loan facility to Customer
@@ -34,74 +34,65 @@ ENDIF
 
 Will create four classes Customer, BankAccount, BankManagement and Dues which represent the entities.
 
-To be continued...
-
-Example of Structured English : 
+Our solution is also able to handle huge structured english, such as :
 
 
-UserStory : Ticketing system aotumatic affectation
+UserStory : Ticketing system automatic affectation
 ```
-TicketingSystem can affect automatically to the appropriate team
-The ticket can be dispatch to 3 different teams :
-   - L1 : First Level team
-   - L2 : Second level team
-   - L3 : Third level team
-The ticket can be set with several properties :
-   - Emergency : Low, Medium, High
-   - Environment : Integration, Approval, preproduction
-   - Skill needed : System, Middleware, Network
-   - Level of skills needed : Easy, Medium, hard
-   - Description : A text which represents the operation
-   - Server URL
- The ticket is represented by an unique id
-   IF Ticket is set on Integration environment THEN
-      IF Skill needed for the ticket is System THEN
-         IF level of skills needed is easy THEN
-            Add ticket to L1 System
-         ELSE IF level of skills needed is medium or hard THEN
-            Add ticket to L2 System
-         END IF
-      END IF
-      IF Skill needed for the ticket is Middleware THEN
-         IF level of skills needed is easy THEN
-            Add ticket to L1 System
-         ELSE IF level of skills needed is medium or hard THEN
-            Add ticket to L2 System
-         END IF
-      END IF
-   ELSE IF ticket is set on Approval environment THEN
-         IF Skill needed for the ticket is System THEN
-            IF level of skills needed is easy THEN
-               Add ticket to L2 System
-            ELSE IF level of skills needed is medium THEN
-               Add ticket to L2 System
+TicketingSystem can affect automatically to Team
+   IF Ticket's environment is set on Integration THEN
+      IF Ticket's skill is middleware THEN
+         IF Skill's level is easy THEN
+            add Ticket to L1System
+         ELSE 
+            IF Skill's level is medium or hard THEN
+                add Ticket to L2System
+            ENDIF
+        ENDIF
+      ENDIF
+   ELSE
+    IF Ticket's environment is set on approval THEN
+         IF Ticket's skill is system THEN
+            IF Skill's level is easy THEN
+               add Ticket to L2System
+            ELSE 
+                IF Skill's level is medium THEN
+                add Ticket to L2System
+                ELSE
+                add Ticket to L3System
+                ENDIF
+            ENDIF
+         ENDIF
+    ELSE
+      IF Ticket's skill is middleware THEN
+         IF Skill's level is easy THEN
+               add Ticket to L2Middleware
             ELSE
-               Add ticket to L3 System
-            END IF
-         END IF
-      IF Skill needed for the ticket is Middleware THEN
-         IF level of skills needed is easy THEN
-               Add ticket to L2 Middleware
-            ELSE IF level of skills needed is medium THEN
-               Add ticket to L2 Middleware
-            ELSE
-               Add ticket to L3 Middleware
-            END IF
-      END IF
-  ELSE
-      IF Skill needed for the ticket is System THEN
-            IF level of skills needed is easy THEN
-               Add ticket to L2 System
-            ELSE IF level of skills needed is medium or hard THEN
-               Add ticket to L3 System
-            END IF
-      END IF
-      IF Skill needed for the ticket is Middleware THEN
-            IF level of skills needed is easy THEN
-               Add ticket to L2 Middleware
-            ELSE IF level of skills needed is medium or hard THEN
-               Add ticket to L3 Middleware
-            END IF
-      END IF
-  END IF
+                IF Skill's level is medium THEN
+                add Ticket to L2Middleware
+                ELSE
+                add Ticket to L3Middleware
+                ENDIF
+            ENDIF
+      ENDIF
+   ENDIF
+      IF Ticket's skill is system THEN
+            IF Skill's level is easy THEN
+               add Ticket to L2System
+            ELSE 
+                IF Skill's level is medium or hard THEN
+                add Ticket to L3System
+                ENDIF
+            ENDIF
+      ENDIF
+      IF Ticket's skill is middleware THEN
+            IF Skill's level is easy THEN
+               add Ticket to L2Middleware
+            ELSE 
+                IF Skill's level is medium or hard THEN
+                add Ticket to L3Middleware
+                ENDIF
+            ENDIF
+      ENDIF
+  ENDIF
 ```
