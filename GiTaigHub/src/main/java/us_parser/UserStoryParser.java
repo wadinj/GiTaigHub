@@ -239,7 +239,7 @@ public class UserStoryParser {
 		// statement le contains, si oui, renvoyer
 		String matched = null;
 		ThesaurusResponse thesaurusResponse = new ThesaurusService().getSynonymousOfWord(name.trim());
-		if (thesaurusResponse != null) {
+		if (thesaurusResponse != null && thesaurusResponse.getVerb() != null) {
 		for (String syn : thesaurusResponse.getVerb().getSyn())
 			if(statement.contains(" " + syn + " "))
 				matched = " " + syn + " ";
