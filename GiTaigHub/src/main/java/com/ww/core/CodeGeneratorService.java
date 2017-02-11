@@ -65,9 +65,8 @@ public class CodeGeneratorService {
 				}
 				if(structuredMethod.getArgs() != null && structuredMethod.getArgs().length > 0) {
 					for(String args : structuredMethod.getArgs()) {
-						// Check here, toLowerCase on parameter is not good strategy to keep camelCase
 						LOGGER.debug("==> Args : " + args);
-						currentMethodBuilder.addParameter(ClassName.get(packageGeneratedClass, args.split(" ")[0]), args.trim().toLowerCase());
+						currentMethodBuilder.addParameter(ClassName.get(packageGeneratedClass, args.split(" ")[0]), StringUtils.uncapitalize(args.trim()));
 					}
 				}
 				currentMethodBuilder.returns(structuredMethod.getReturnType());
@@ -90,8 +89,7 @@ public class CodeGeneratorService {
 				}
 				if(structuredConstructor.getArgs() != null && structuredConstructor.getArgs().length > 0) {
 					for(String args : structuredConstructor.getArgs()) {
-						// Check here, toLowerCase on parameter is not good strategy to keep camelCase
-						currentMethodBuilder.addParameter(ClassName.get(packageGeneratedClass, args.split(" ")[0]), StringUtils.stringAsMethodName(args.trim()));
+						currentMethodBuilder.addParameter(ClassName.get(packageGeneratedClass, args.split(" ")[0]), StringUtils.uncapitalize(args.trim()));
 					}
 				}
 				currentMethodBuilder.addComment("TODO: not yet implemented \n", new Object[] {});
