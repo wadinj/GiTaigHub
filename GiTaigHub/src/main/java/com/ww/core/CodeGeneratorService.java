@@ -130,5 +130,8 @@ public class CodeGeneratorService {
 		currentClass.addMethod(getter.build());
 		currentClass.addMethod(setter.build());
 	}
+	public File getPackageGeneratedFile() {
+		return packageGeneratedFile;
+	}
 }
 
