@@ -96,3 +96,8 @@ TicketingSystem can affect automatically to Team
       ENDIF
   ENDIF
 ```
+
+
+All user stories can be found on our Taiga project on this link : 
+
+https://tree.taiga.io/project/franckw-opl/
